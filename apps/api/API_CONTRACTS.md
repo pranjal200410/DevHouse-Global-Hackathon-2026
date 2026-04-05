@@ -1,0 +1,162 @@
+# API Contracts (Pranjal Scope)
+
+Base URL: `http://localhost:4000`
+
+All responses use this envelope:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error envelope:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human readable message",
+    "details": {}
+  }
+}
+```
+
+## Health
+
+### GET `/health`
+
+Returns service health and timestamp.
+
+## Auth
+
+### POST `/v1/auth/demo-login`
+
+Request body:
+
+```json
+{
+  "email": "demo@devhouse.app",
+  "pin": "2026"
+}
+```
+
+`pin` is optional. If provided and invalid, returns `401 INVALID_CREDENTIALS`.
+
+Response `200`:
+
+```json
+{
+  "success": true,
+  "data": {
+    "token": "uuid",
+    "expiresAt": "2026-04-06T12:00:00.000Z",
+    "demoMode": true,
+    "user": {
+      "id": "user_demo_001",
+      "email": "demo@devhouse.app",
+      "name": "demo",
+      "onboardingCompleted": true,
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  }
+}
+```
+
+### GET `/v1/auth/session`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns current session and user data.
+
+### POST `/v1/auth/logout`
+
+Headers: `Authorization: Bearer <token>`
+
+Revokes current token.
+
+### POST `/v1/auth/demo-reset`
+
+Resets deterministic demo data and clears all sessions.
+
+## Dashboard
+
+### GET `/v1/dashboard/summary`
+
+Headers: `Authorization: Bearer <token>`
+
+Response includes:
+
+- `monthlySpend`
+- `activeSubscriptions`
+- `highRiskCount`
+- `riskBand` (`stable|watch|critical`)
+- `nextRenewalDate`
+- `potentialSavings`
+
+## Subscriptions
+
+### GET `/v1/subscriptions`
+
+Headers: `Authorization: Bearer <token>`
+
+Query params:
+
+- `status`: `active|canceling|cancelled`
+- `riskLevel`: `low|medium|high`
+- `sort`: `renewal-asc|amount-desc|amount-asc`
+
+Returns subscription cards.
+
+### GET `/v1/subscriptions/:id`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns detail payload:
+
+- `subscription`
+- `history`
+- `cancellation`
+- `blockRule`
+- `disputes`
+- `actions`
+
+### POST `/v1/subscriptions/:id/cancel`
+
+Headers: `Authorization: Bearer <token>`
+
+Marks cancellation as in-progress and updates subscription status.
+
+### POST `/v1/subscriptions/:id/cancel/complete`
+
+Headers: `Authorization: Bearer <token>`
+
+Completes cancellation and sets subscription as cancelled.
+
+### POST `/v1/subscriptions/:id/block`
+
+Headers: `Authorization: Bearer <token>`
+
+Request body:
+
+```json
+{
+  "enabled": true
+}
+```
+
+Updates auto-block flag for this subscription.
+
+## Renewal Calendar
+
+### GET `/v1/renewals/calendar`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns upcoming charge events with risk color:
+
+- `emerald` for low risk
+- `amber` for medium risk
+- `rose` for high risk

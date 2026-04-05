@@ -1,0 +1,268 @@
+"use client";
+
+import { AppHeader } from "@/components/app-header";
+import { StatusBadge } from "@/components/status-badge";
+import {
+  ClientError,
+  completeCancellation,
+  getSubscriptionDetail,
+  setAutoBlock,
+  startCancellation,
+} from "@/lib/api";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
+import { useSessionStore } from "@/lib/session-store";
+import type { SubscriptionDetail } from "@/lib/types";
+import { AlertTriangle, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+const getToneByRisk = (risk: "low" | "medium" | "high"): "emerald" | "amber" | "rose" => {
+  if (risk === "high") {
+    return "rose";
+  }
+  if (risk === "medium") {
+    return "amber";
+  }
+  return "emerald";
+};
+
+export default function SubscriptionDetailPage() {
+  const router = useRouter();
+  const params = useParams<{ id: string }>();
+
+  const token = useSessionStore((state) => state.token);
+  const clearSession = useSessionStore((state) => state.clearSession);
+
+  const subscriptionId = params.id;
+
+  const [detail, setDetail] = useState<SubscriptionDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<"cancel" | "complete" | "block" | null>(null);
+
+  const loadDetail = useCallback(async () => {
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await getSubscriptionDetail(token, subscriptionId);
+      setDetail(response);
+    } catch (requestError) {
+      if (requestError instanceof ClientError && requestError.statusCode === 401) {
+        clearSession();
+        router.replace("/auth");
+        return;
+      }
+
+      setError("Could not load subscription detail.");
+    } finally {
+      setLoading(false);
+    }
+  }, [token, subscriptionId, clearSession, router]);
+
+  useEffect(() => {
+    if (!token) {
+      router.replace("/auth");
+      return;
+    }
+    void loadDetail();
+  }, [token, loadDetail, router]);
+
+  const runAction = async (
+    action: "cancel" | "complete" | "block",
+    runner: () => Promise<SubscriptionDetail>,
+  ) => {
+    if (!token) {
+      return;
+    }
+
+    setActionLoading(action);
+    setError(null);
+    try {
+      const updated = await runner();
+      setDetail(updated);
+    } catch (requestError) {
+      if (requestError instanceof ClientError && requestError.statusCode === 401) {
+        clearSession();
+        router.replace("/auth");
+        return;
+      }
+
+      setError("Action failed. Please retry.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  if (!token) {
+    return null;
+  }
+
+  const blockEnabled = detail?.blockRule?.enabled ?? false;
+
+  return (
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
+      <AppHeader
+        title={detail?.subscription.merchant ?? "Subscription Detail"}
+        subtitle="Review full billing history, cancellation lifecycle, and risk controls for this subscription."
+        rightSlot={
+          <>
+            <Link className="cta-secondary" href="/dashboard">
+              Back to Dashboard
+            </Link>
+            <Link className="cta-primary" href="/renewals">
+              Calendar
+            </Link>
+          </>
+        }
+      />
+
+      {error ? <p className="glass-card rounded-xl px-4 py-3 text-sm text-rose-700">{error}</p> : null}
+
+      <section className="grid gap-4 md:grid-cols-[1.25fr_1fr]">
+        <article className="glass-card reveal p-6" style={{ animationDelay: "80ms" }}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Screen 8 - Subscription Detail</p>
+
+          {loading || !detail ? (
+            <p className="mt-4 text-sm text-slate-600">Loading detail...</p>
+          ) : (
+            <>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <StatusBadge label={detail.subscription.riskLevel} tone={getToneByRisk(detail.subscription.riskLevel)} />
+                <StatusBadge
+                  label={detail.subscription.status}
+                  tone={detail.subscription.status === "active" ? "blue" : detail.subscription.status === "canceling" ? "amber" : "slate"}
+                />
+                {detail.blockRule?.enabled ? <StatusBadge label="Auto-block active" tone="emerald" /> : null}
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <div className="surface-muted p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Amount</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">{formatCurrency(detail.subscription.amount)}</p>
+                </div>
+                <div className="surface-muted p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Next renewal</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">{formatDate(detail.subscription.nextRenewalDate)}</p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                <button
+                  className="cta-secondary"
+                  disabled={actionLoading !== null || !detail.actions.canCancel}
+                  onClick={() =>
+                    void runAction("cancel", () => startCancellation(token, detail.subscription.id))
+                  }
+                  type="button"
+                >
+                  {actionLoading === "cancel" ? "Starting..." : "Start Cancellation"}
+                </button>
+
+                <button
+                  className="cta-secondary"
+                  disabled={actionLoading !== null || !detail.actions.canCancel}
+                  onClick={() =>
+                    void runAction("complete", () => completeCancellation(token, detail.subscription.id))
+                  }
+                  type="button"
+                >
+                  {actionLoading === "complete" ? "Completing..." : "Mark as Completed"}
+                </button>
+
+                <button
+                  className="cta-primary"
+                  disabled={actionLoading !== null || !detail.actions.canBlock}
+                  onClick={() =>
+                    void runAction("block", () => setAutoBlock(token, detail.subscription.id, !blockEnabled))
+                  }
+                  type="button"
+                >
+                  {actionLoading === "block"
+                    ? "Saving..."
+                    : blockEnabled
+                      ? "Disable Auto-block"
+                      : "Enable Auto-block"}
+                </button>
+              </div>
+
+              {detail.cancellation ? (
+                <div className="surface-muted mt-5 p-4">
+                  <p className="text-sm font-semibold text-slate-900">Cancellation progress</p>
+                  <p className="mt-1 text-sm text-slate-600">State: {detail.cancellation.state}</p>
+                  <p className="mt-1 text-sm text-slate-600">Next action: {detail.cancellation.nextAction}</p>
+                  <ol className="mt-3 space-y-2 text-sm text-slate-700">
+                    {detail.cancellation.steps.map((step) => (
+                      <li key={step} className="flex items-start gap-2">
+                        <span className="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-white text-[11px] font-bold text-slate-700">
+                          •
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
+            </>
+          )}
+        </article>
+
+        <aside className="space-y-4">
+          <article className="glass-card reveal p-5" style={{ animationDelay: "130ms" }}>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="text-emerald-600" size={18} />
+              <h3 className="text-lg font-semibold text-slate-900">Renewal History</h3>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {detail?.history.map((event) => (
+                <div key={event.id} className="surface-muted p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-900">{formatDateTime(event.date)}</p>
+                    <StatusBadge
+                      label={event.status}
+                      tone={event.status === "charged" ? "blue" : event.status === "blocked" ? "emerald" : "rose"}
+                    />
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {formatCurrency(event.amount)} · {event.note}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="glass-card reveal p-5" style={{ animationDelay: "180ms" }}>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="text-amber-500" size={18} />
+              <h3 className="text-lg font-semibold text-slate-900">Dispute Evidence</h3>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {detail?.disputes.length ? (
+                detail.disputes.map((dispute) => (
+                  <div key={dispute.id} className="surface-muted p-3">
+                    <p className="text-sm font-semibold text-slate-900">{formatDateTime(dispute.incidentDate)}</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {formatCurrency(dispute.amount)} · {dispute.reason}
+                    </p>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Status: {dispute.status}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-600">No disputes recorded for this subscription.</p>
+              )}
+            </div>
+          </article>
+        </aside>
+      </section>
+    </main>
+  );
+}

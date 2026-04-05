@@ -1,0 +1,36 @@
+{
+  "name": "devhouse-global-hackathon-2026",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm install && npm --prefix apps/api install && npm --prefix apps/web install",
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev": "concurrently -k -n API,WEB -c green,cyan \"npm run dev:api\" \"npm run dev:web\"",
+    "build:api": "npm --prefix apps/api run build",
+    "build:web": "npm --prefix apps/web run build",
+    "build": "npm run build:api && npm run build:web",
+    "typecheck:api": "npm --prefix apps/api run typecheck",
+    "qa:api": "npm --prefix apps/api run qa:contracts",
+    "lint:web": "npm --prefix apps/web run lint",
+    "verify": "npm run typecheck:api && npm run qa:api && npm run lint:web && npm run build:web",
+    "test": "npm run verify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranjal200410/DevHouse-Global-Hackathon-2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pranjal200410/DevHouse-Global-Hackathon-2026/issues"
+  },
+  "homepage": "https://github.com/pranjal200410/DevHouse-Global-Hackathon-2026#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "wait-on": "^9.0.4"
+  }
+}
