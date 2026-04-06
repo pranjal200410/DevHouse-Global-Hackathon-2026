@@ -1,5 +1,4 @@
 import type { FastifyRequest } from "fastify";
-import { getDemoUser } from "../data/demoState";
 import type { Session, User } from "../types";
 import { AppError } from "./http";
 import { getSession } from "./sessionStore";
@@ -30,10 +29,7 @@ export const requireAuth = (request: FastifyRequest): AuthContext => {
     throw new AppError(401, "SESSION_EXPIRED", "Session is invalid or expired.");
   }
 
-  const user = getDemoUser();
-  if (user.id !== session.userId) {
-    throw new AppError(401, "SESSION_USER_MISMATCH", "Session user does not match demo user.");
-  }
+  const user = session.user;
 
   return {
     token,

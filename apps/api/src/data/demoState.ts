@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { AppError } from "../lib/http";
 import type {
   BlockRule,
@@ -22,18 +23,13 @@ interface DemoState {
   disputes: DisputeRecord[];
 }
 
-const DEMO_USER: User = {
-  id: "user_demo_001",
-  email: "demo@devhouse.app",
-  name: "Pranjal Demo",
-  onboardingCompleted: true,
-  createdAt: "2026-01-01T00:00:00.000Z",
-};
+const TEMPLATE_USER_ID = "user_template_001";
+const TEMPLATE_CREATED_AT = "2026-01-01T00:00:00.000Z";
 
 const DEMO_SUBSCRIPTIONS: Subscription[] = [
   {
     id: "sub_netflix",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "Netflix",
     category: "Streaming",
     amount: 15.99,
@@ -47,7 +43,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_spotify",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "Spotify Premium",
     category: "Music",
     amount: 11.99,
@@ -61,7 +57,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_notion",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "Notion Plus",
     category: "Productivity",
     amount: 12,
@@ -75,7 +71,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_adobe",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "Adobe Creative Cloud",
     category: "Design",
     amount: 59.99,
@@ -89,7 +85,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_gym",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "GymPro Annual",
     category: "Fitness",
     amount: 79,
@@ -103,7 +99,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_cloudai",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "CloudAI Starter",
     category: "SaaS",
     amount: 25,
@@ -117,7 +113,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_primevideo",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "Prime Video",
     category: "Streaming",
     amount: 8.99,
@@ -131,7 +127,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_foodbox",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "FoodBox Weekly",
     category: "Food",
     amount: 32,
@@ -145,7 +141,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_newsplus",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "NewsPlus",
     category: "News",
     amount: 6.49,
@@ -159,7 +155,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
   },
   {
     id: "sub_masterclass",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     merchant: "MasterClass",
     category: "Learning",
     amount: 15,
@@ -176,7 +172,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
 const DEMO_RENEWALS: RenewalEvent[] = [
   {
     id: "ren_001",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_netflix",
     date: "2026-03-08T10:00:00.000Z",
     amount: 15.99,
@@ -185,7 +181,7 @@ const DEMO_RENEWALS: RenewalEvent[] = [
   },
   {
     id: "ren_002",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_adobe",
     date: "2026-03-10T10:00:00.000Z",
     amount: 59.99,
@@ -194,7 +190,7 @@ const DEMO_RENEWALS: RenewalEvent[] = [
   },
   {
     id: "ren_003",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_gym",
     date: "2026-03-29T10:00:00.000Z",
     amount: 79,
@@ -203,7 +199,7 @@ const DEMO_RENEWALS: RenewalEvent[] = [
   },
   {
     id: "ren_004",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_newsplus",
     date: "2026-03-09T10:00:00.000Z",
     amount: 6.49,
@@ -212,7 +208,7 @@ const DEMO_RENEWALS: RenewalEvent[] = [
   },
   {
     id: "ren_005",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_masterclass",
     date: "2026-03-16T10:00:00.000Z",
     amount: 15,
@@ -224,7 +220,7 @@ const DEMO_RENEWALS: RenewalEvent[] = [
 const DEMO_CANCELLATIONS: CancellationRecord[] = [
   {
     id: "can_001",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_gym",
     state: "in-progress",
     requestedAt: "2026-03-28T11:00:00.000Z",
@@ -240,7 +236,7 @@ const DEMO_CANCELLATIONS: CancellationRecord[] = [
   },
   {
     id: "can_002",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_foodbox",
     state: "completed",
     requestedAt: "2026-02-16T10:00:00.000Z",
@@ -254,14 +250,14 @@ const DEMO_CANCELLATIONS: CancellationRecord[] = [
 const DEMO_BLOCKS: BlockRule[] = [
   {
     id: "blk_001",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_adobe",
     enabled: true,
     updatedAt: "2026-04-01T08:00:00.000Z",
   },
   {
     id: "blk_002",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_masterclass",
     enabled: true,
     updatedAt: "2026-04-01T08:30:00.000Z",
@@ -271,7 +267,7 @@ const DEMO_BLOCKS: BlockRule[] = [
 const DEMO_DISPUTES: DisputeRecord[] = [
   {
     id: "dsp_001",
-    userId: DEMO_USER.id,
+    userId: TEMPLATE_USER_ID,
     subscriptionId: "sub_gym",
     incidentDate: "2026-03-29T10:00:00.000Z",
     amount: 79,
@@ -279,6 +275,11 @@ const DEMO_DISPUTES: DisputeRecord[] = [
     status: "submitted",
   },
 ];
+
+const userStates = new Map<string, DemoState>();
+
+const byDateAsc = (a: string, b: string): number => Date.parse(a) - Date.parse(b);
+const byDateDesc = (a: string, b: string): number => Date.parse(b) - Date.parse(a);
 
 const riskToColor = (riskLevel: RiskLevel): RenewalCalendarItem["riskColor"] => {
   if (riskLevel === "high") {
@@ -289,20 +290,6 @@ const riskToColor = (riskLevel: RiskLevel): RenewalCalendarItem["riskColor"] => 
   }
   return "emerald";
 };
-
-const createInitialState = (): DemoState => ({
-  user: structuredClone(DEMO_USER),
-  subscriptions: structuredClone(DEMO_SUBSCRIPTIONS),
-  renewals: structuredClone(DEMO_RENEWALS),
-  cancellations: structuredClone(DEMO_CANCELLATIONS),
-  blocks: structuredClone(DEMO_BLOCKS),
-  disputes: structuredClone(DEMO_DISPUTES),
-});
-
-let state = createInitialState();
-
-const byDateAsc = (a: string, b: string): number => Date.parse(a) - Date.parse(b);
-const byDateDesc = (a: string, b: string): number => Date.parse(b) - Date.parse(a);
 
 const getRiskBand = (highRiskCount: number): DashboardSummary["riskBand"] => {
   if (highRiskCount >= 3) {
@@ -322,7 +309,55 @@ const getPotentialSavings = (subscriptions: Subscription[]): number =>
       .toFixed(2),
   );
 
-const findSubscriptionOrThrow = (subscriptionId: string): Subscription => {
+const normalizeEmail = (email: string): string => email.trim().toLowerCase();
+
+const nameFromEmail = (email: string): string => {
+  const localPart = email.split("@")[0]?.trim() || "demo";
+  return localPart
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const userIdFromEmail = (email: string): string => {
+  const digest = createHash("sha256").update(email).digest("hex").slice(0, 12);
+  return `user_${digest}`;
+};
+
+const createInitialState = (user: User): DemoState => ({
+  user: structuredClone(user),
+  subscriptions: structuredClone(DEMO_SUBSCRIPTIONS).map((item) => ({
+    ...item,
+    userId: user.id,
+  })),
+  renewals: structuredClone(DEMO_RENEWALS).map((item) => ({
+    ...item,
+    userId: user.id,
+  })),
+  cancellations: structuredClone(DEMO_CANCELLATIONS).map((item) => ({
+    ...item,
+    userId: user.id,
+  })),
+  blocks: structuredClone(DEMO_BLOCKS).map((item) => ({
+    ...item,
+    userId: user.id,
+  })),
+  disputes: structuredClone(DEMO_DISPUTES).map((item) => ({
+    ...item,
+    userId: user.id,
+  })),
+});
+
+const getStateOrThrow = (userId: string): DemoState => {
+  const state = userStates.get(userId);
+  if (!state) {
+    throw new AppError(401, "SESSION_STATE_MISSING", "Demo workspace is missing. Please login again.");
+  }
+  return state;
+};
+
+const findSubscriptionOrThrow = (state: DemoState, subscriptionId: string): Subscription => {
   const target = state.subscriptions.find((item) => item.id === subscriptionId);
   if (!target) {
     throw new AppError(404, "SUBSCRIPTION_NOT_FOUND", "Subscription does not exist.");
@@ -330,19 +365,50 @@ const findSubscriptionOrThrow = (subscriptionId: string): Subscription => {
   return target;
 };
 
-export const resetDemoState = (): void => {
-  state = createInitialState();
+export const getOrCreateDemoUser = (email: string): User => {
+  const normalizedEmail = normalizeEmail(email);
+  const userId = userIdFromEmail(normalizedEmail);
+
+  const existingState = userStates.get(userId);
+  if (existingState) {
+    existingState.user.email = normalizedEmail;
+    existingState.user.name = nameFromEmail(normalizedEmail);
+    return structuredClone(existingState.user);
+  }
+
+  const user: User = {
+    id: userId,
+    email: normalizedEmail,
+    name: nameFromEmail(normalizedEmail),
+    onboardingCompleted: true,
+    createdAt: TEMPLATE_CREATED_AT,
+  };
+
+  userStates.set(user.id, createInitialState(user));
+  return structuredClone(user);
 };
 
-export const getDemoUser = (): User => structuredClone(state.user);
+export const ensureDemoStateForUser = (user: User): void => {
+  if (userStates.has(user.id)) {
+    return;
+  }
 
-export const updateDemoUserEmail = (email: string): User => {
-  state.user.email = email.toLowerCase();
-  state.user.name = email.split("@")[0]?.replace(/\./g, " ") || "Pranjal Demo";
-  return getDemoUser();
+  userStates.set(user.id, createInitialState(user));
 };
 
-export const getDashboardSummary = (): DashboardSummary => {
+export const resetAllDemoStates = (): void => {
+  userStates.clear();
+};
+
+export const resetDemoStateForUser = (userId: string): void => {
+  const currentState = getStateOrThrow(userId);
+  userStates.set(userId, createInitialState(currentState.user));
+};
+
+export const getDemoUser = (userId: string): User => structuredClone(getStateOrThrow(userId).user);
+
+export const getDashboardSummary = (userId: string): DashboardSummary => {
+  const state = getStateOrThrow(userId);
   const liveSubscriptions = state.subscriptions.filter((item) => item.status !== "cancelled");
   const monthlySpend = Number(liveSubscriptions.reduce((sum, item) => sum + item.amount, 0).toFixed(2));
 
@@ -363,11 +429,15 @@ export const getDashboardSummary = (): DashboardSummary => {
   };
 };
 
-export const listSubscriptions = (options?: {
-  status?: SubscriptionStatus;
-  riskLevel?: RiskLevel;
-  sort?: "renewal-asc" | "amount-desc" | "amount-asc";
-}): Subscription[] => {
+export const listSubscriptions = (
+  userId: string,
+  options?: {
+    status?: SubscriptionStatus;
+    riskLevel?: RiskLevel;
+    sort?: "renewal-asc" | "amount-desc" | "amount-asc";
+  },
+): Subscription[] => {
+  const state = getStateOrThrow(userId);
   const status = options?.status;
   const riskLevel = options?.riskLevel;
   const sort = options?.sort ?? "renewal-asc";
@@ -403,8 +473,9 @@ export const listSubscriptions = (options?: {
   return structuredClone(output);
 };
 
-export const getSubscriptionDetail = (subscriptionId: string): SubscriptionDetail => {
-  const subscription = findSubscriptionOrThrow(subscriptionId);
+export const getSubscriptionDetail = (userId: string, subscriptionId: string): SubscriptionDetail => {
+  const state = getStateOrThrow(userId);
+  const subscription = findSubscriptionOrThrow(state, subscriptionId);
 
   const history = state.renewals
     .filter((entry) => entry.subscriptionId === subscription.id)
@@ -429,10 +500,11 @@ export const getSubscriptionDetail = (subscriptionId: string): SubscriptionDetai
   };
 };
 
-export const startCancellation = (subscriptionId: string): SubscriptionDetail => {
-  const subscription = findSubscriptionOrThrow(subscriptionId);
+export const startCancellation = (userId: string, subscriptionId: string): SubscriptionDetail => {
+  const state = getStateOrThrow(userId);
+  const subscription = findSubscriptionOrThrow(state, subscriptionId);
   if (subscription.status === "cancelled") {
-    return getSubscriptionDetail(subscriptionId);
+    return getSubscriptionDetail(userId, subscriptionId);
   }
 
   subscription.status = "canceling";
@@ -463,11 +535,12 @@ export const startCancellation = (subscriptionId: string): SubscriptionDetail =>
     cancellation.nextAction = "Complete final confirmation in merchant account.";
   }
 
-  return getSubscriptionDetail(subscriptionId);
+  return getSubscriptionDetail(userId, subscriptionId);
 };
 
-export const completeCancellation = (subscriptionId: string): SubscriptionDetail => {
-  const subscription = findSubscriptionOrThrow(subscriptionId);
+export const completeCancellation = (userId: string, subscriptionId: string): SubscriptionDetail => {
+  const state = getStateOrThrow(userId);
+  const subscription = findSubscriptionOrThrow(state, subscriptionId);
 
   let cancellation = state.cancellations.find((entry) => entry.subscriptionId === subscriptionId);
   if (!cancellation) {
@@ -493,11 +566,12 @@ export const completeCancellation = (subscriptionId: string): SubscriptionDetail
   subscription.nextRenewalDate = null;
   subscription.riskLevel = "low";
 
-  return getSubscriptionDetail(subscriptionId);
+  return getSubscriptionDetail(userId, subscriptionId);
 };
 
-export const setAutoBlock = (subscriptionId: string, enabled: boolean): SubscriptionDetail => {
-  findSubscriptionOrThrow(subscriptionId);
+export const setAutoBlock = (userId: string, subscriptionId: string, enabled: boolean): SubscriptionDetail => {
+  const state = getStateOrThrow(userId);
+  findSubscriptionOrThrow(state, subscriptionId);
 
   let rule = state.blocks.find((entry) => entry.subscriptionId === subscriptionId);
   if (!rule) {
@@ -514,10 +588,11 @@ export const setAutoBlock = (subscriptionId: string, enabled: boolean): Subscrip
     rule.updatedAt = new Date().toISOString();
   }
 
-  return getSubscriptionDetail(subscriptionId);
+  return getSubscriptionDetail(userId, subscriptionId);
 };
 
-export const getRenewalCalendar = (): RenewalCalendarItem[] => {
+export const getRenewalCalendar = (userId: string): RenewalCalendarItem[] => {
+  const state = getStateOrThrow(userId);
   const activeRows = state.subscriptions
     .filter((subscription) => subscription.status !== "cancelled" && Boolean(subscription.nextRenewalDate))
     .map((subscription) => ({
@@ -534,4 +609,4 @@ export const getRenewalCalendar = (): RenewalCalendarItem[] => {
   return structuredClone(activeRows);
 };
 
-export const getDemoStateSnapshot = (): DemoState => structuredClone(state);
+export const getDemoStateSnapshot = (userId: string): DemoState => structuredClone(getStateOrThrow(userId));

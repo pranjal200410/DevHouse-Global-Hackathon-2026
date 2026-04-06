@@ -18,9 +18,9 @@ import { parseOrThrow } from "../lib/validation";
 
 export const registerSubscriptionRoutes = (fastify: FastifyInstance): void => {
   fastify.get("/subscriptions", async (request, reply) => {
-    requireAuth(request);
+    const auth = requireAuth(request);
     const query = parseOrThrow(listSubscriptionsQuerySchema, request.query ?? {}, "subscriptions query");
-    const rows = listSubscriptions({
+    const rows = listSubscriptions(auth.user.id, {
       status: query.status,
       riskLevel: query.riskLevel,
       sort: query.sort,
@@ -29,32 +29,32 @@ export const registerSubscriptionRoutes = (fastify: FastifyInstance): void => {
   });
 
   fastify.get("/subscriptions/:id", async (request, reply) => {
-    requireAuth(request);
+    const auth = requireAuth(request);
     const params = parseOrThrow(subscriptionParamsSchema, request.params ?? {}, "subscription params");
-    return reply.status(200).send(toSuccess(getSubscriptionDetail(params.id)));
+    return reply.status(200).send(toSuccess(getSubscriptionDetail(auth.user.id, params.id)));
   });
 
   fastify.post("/subscriptions/:id/cancel", async (request, reply) => {
-    requireAuth(request);
+    const auth = requireAuth(request);
     const params = parseOrThrow(subscriptionParamsSchema, request.params ?? {}, "subscription params");
-    return reply.status(200).send(toSuccess(startCancellation(params.id)));
+    return reply.status(200).send(toSuccess(startCancellation(auth.user.id, params.id)));
   });
 
   fastify.post("/subscriptions/:id/cancel/complete", async (request, reply) => {
-    requireAuth(request);
+    const auth = requireAuth(request);
     const params = parseOrThrow(subscriptionParamsSchema, request.params ?? {}, "subscription params");
-    return reply.status(200).send(toSuccess(completeCancellation(params.id)));
+    return reply.status(200).send(toSuccess(completeCancellation(auth.user.id, params.id)));
   });
 
   fastify.post("/subscriptions/:id/block", async (request, reply) => {
-    requireAuth(request);
+    const auth = requireAuth(request);
     const params = parseOrThrow(subscriptionParamsSchema, request.params ?? {}, "subscription params");
     const payload = parseOrThrow(setBlockPayloadSchema, request.body ?? {}, "block payload");
-    return reply.status(200).send(toSuccess(setAutoBlock(params.id, payload.enabled)));
+    return reply.status(200).send(toSuccess(setAutoBlock(auth.user.id, params.id, payload.enabled)));
   });
 
   fastify.get("/renewals/calendar", async (request, reply) => {
-    requireAuth(request);
-    return reply.status(200).send(toSuccess(getRenewalCalendar()));
+    const auth = requireAuth(request);
+    return reply.status(200).send(toSuccess(getRenewalCalendar(auth.user.id)));
   });
 };

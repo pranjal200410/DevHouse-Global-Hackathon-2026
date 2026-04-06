@@ -25,7 +25,7 @@ export default function AuthPage() {
     try {
       const session = await demoLogin({
         email: email.trim(),
-        pin: pin.trim() || undefined,
+        pin: pin.trim(),
       });
 
       setSession({
@@ -104,7 +104,7 @@ export default function AuthPage() {
           </label>
 
           <label className="block text-sm font-semibold text-slate-700">
-            PIN (optional)
+            PIN (required)
             <input
               className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none ring-emerald-200 transition focus:ring"
               type="password"
@@ -114,6 +114,7 @@ export default function AuthPage() {
               inputMode="numeric"
               pattern="[0-9]{4}"
               placeholder="2026"
+              required
             />
           </label>
 

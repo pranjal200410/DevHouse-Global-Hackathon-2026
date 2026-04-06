@@ -43,7 +43,7 @@ Request body:
 }
 ```
 
-`pin` is optional. If provided and invalid, returns `401 INVALID_CREDENTIALS`.
+`pin` is required. Invalid PIN returns `401 INVALID_CREDENTIALS`.
 
 Response `200`:
 
@@ -79,7 +79,13 @@ Revokes current token.
 
 ### POST `/v1/auth/demo-reset`
 
-Resets deterministic demo data and clears all sessions.
+Headers:
+
+- `Authorization: Bearer <token>`
+- `x-demo-reset-key: <reset-key>`
+
+Resets deterministic demo data for the authenticated demo user only.
+If the reset key is invalid, returns `403 RESET_FORBIDDEN`.
 
 ## Dashboard
 

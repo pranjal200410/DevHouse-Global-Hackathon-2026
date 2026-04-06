@@ -13,9 +13,10 @@
     "build": "npm run build:api && npm run build:web",
     "typecheck:api": "npm --prefix apps/api run typecheck",
     "qa:api": "npm --prefix apps/api run qa:contracts",
+    "test:api": "npm --prefix apps/api run test",
     "lint:web": "npm --prefix apps/web run lint",
     "verify": "npm run typecheck:api && npm run qa:api && npm run lint:web && npm run build:web",
-    "test": "npm run verify"
+    "test": "npm run verify && npm run test:api"
   },
   "repository": {
     "type": "git",

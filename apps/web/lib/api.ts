@@ -55,7 +55,7 @@ const request = async <T>(
   return envelope.data;
 };
 
-export const demoLogin = async (payload: { email?: string; pin?: string }): Promise<SessionResponse> =>
+export const demoLogin = async (payload: { email: string; pin: string }): Promise<SessionResponse> =>
   request<SessionResponse>("/v1/auth/demo-login", {
     method: "POST",
     body: JSON.stringify(payload),

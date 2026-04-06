@@ -9,12 +9,11 @@ interface Envelope<T> {
 const main = async (): Promise<void> => {
   process.env.NODE_ENV = "test";
   const app = buildServer();
+  const resetKey = process.env.DEMO_RESET_KEY ?? "devhouse-reset-2026";
 
   try {
     const health = await app.inject({ method: "GET", url: "/health" });
     assert.equal(health.statusCode, 200, "health endpoint failed");
-
-    await app.inject({ method: "POST", url: "/v1/auth/demo-reset" });
 
     const login = await app.inject({
       method: "POST",
@@ -32,6 +31,16 @@ const main = async (): Promise<void> => {
     assert.ok(token, "missing session token");
 
     const authHeaders = { authorization: `Bearer ${token}` };
+
+    const reset = await app.inject({
+      method: "POST",
+      url: "/v1/auth/demo-reset",
+      headers: {
+        ...authHeaders,
+        "x-demo-reset-key": resetKey,
+      },
+    });
+    assert.equal(reset.statusCode, 200, "demo reset endpoint failed");
 
     const session = await app.inject({ method: "GET", url: "/v1/auth/session", headers: authHeaders });
     assert.equal(session.statusCode, 200, "session endpoint failed");

@@ -16,6 +16,7 @@ export interface User {
 export interface Session {
   token: string;
   userId: string;
+  user: User;
   demoMode: true;
   createdAt: string;
   expiresAt: string;

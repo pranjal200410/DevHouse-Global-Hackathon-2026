@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "qa:contracts": "tsx src/scripts/contractSmoke.ts",
-    "test": "echo \"No API unit tests configured yet\""
+    "test": "tsx --test test/**/*.test.ts"
   },
   "keywords": [],
   "author": "",

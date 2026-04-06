@@ -2,11 +2,10 @@ import { z } from "zod";
 
 export const loginPayloadSchema = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().email(),
     pin: z
       .string()
-      .regex(/^\d{4}$/)
-      .optional(),
+      .regex(/^\d{4}$/),
   })
   .strict();
 
