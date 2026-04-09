@@ -1,33 +1,19 @@
 import Link from "next/link";
+import { Button } from "./ui/Button";
 
-export default function Navbar() {
+export function Navbar() {
   return (
-    <nav
-      className="flex items-center justify-between px-12 py-5 sticky top-0 z-10 border-b"
-      style={{
-        background: "rgba(11,22,41,0.92)",
-        backdropFilter: "blur(8px)",
-        borderColor: "rgba(255,255,255,0.08)",
-      }}
-    >
-      <div className="flex items-center gap-2 font-display font-extrabold text-xl tracking-tight text-cream">
-        <span
-          className="w-2 h-2 rounded-full animate-pulse-dot"
-          style={{ background: "var(--emerald)" }}
-        />
-        SubGuard
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl px-6 py-4 sm:px-8">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-xl font-semibold text-white">
+            SubGuard
+          </Link>
+          <Button as={Link} href="/auth" variant="primary" className="hidden sm:flex">
+            Try Demo
+          </Button>
+        </div>
       </div>
-
-      <Link
-        href="/auth"
-        className="px-5 py-2 rounded-lg font-medium text-sm transition-colors hover:bg-[var(--emerald-light)]"
-        style={{
-          background: "var(--emerald)",
-          color: "var(--navy)",
-        }}
-      >
-        Try Demo — Free
-      </Link>
     </nav>
   );
 }
