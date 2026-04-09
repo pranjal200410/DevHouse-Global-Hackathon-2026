@@ -72,7 +72,7 @@ const steps: Step[] = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-20 px-12">
+    <section id="how-it-works" className="py-20 px-12">
       <div className="max-w-5xl mx-auto mb-14">
         <p
           className="text-xs uppercase tracking-widest font-medium mb-4"

@@ -1,4 +1,4 @@
-"use client";
+import Link from "next/link";
 
 const stats = [
   { value: "$273", unit: "/yr", label: "avg. wasted on forgotten subs" },
@@ -29,13 +29,15 @@ export default function Hero() {
       </p>
 
       <div className="flex flex-wrap gap-4 mb-14">
-        <button
+        <Link
+          href="/auth"
           className="px-8 py-3 rounded-xl font-medium text-base transition-all hover:-translate-y-px"
           style={{ background: "var(--emerald)", color: "var(--navy)" }}
         >
           Try the Live Demo
-        </button>
-        <button
+        </Link>
+        <Link
+          href="#how-it-works"
           className="px-8 py-3 rounded-xl font-normal text-base transition-colors"
           style={{
             background: "transparent",
@@ -44,7 +46,7 @@ export default function Hero() {
           }}
         >
           How it works →
-        </button>
+        </Link>
       </div>
 
       <div

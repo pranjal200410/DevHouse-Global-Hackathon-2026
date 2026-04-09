@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const perks = [
   "10 real-looking subscriptions pre-loaded",
   "3 upcoming renewals on the risk calendar",
@@ -21,10 +23,7 @@ export default function TryDemo() {
         borderTop: "0.5px solid rgba(255,255,255,0.07)",
       }}
     >
-      <div
-        className="max-w-5xl mx-auto grid gap-12 items-center"
-        style={{ gridTemplateColumns: "1fr 1fr" }}
-      >
+      <div className="max-w-5xl mx-auto grid gap-12 items-center grid-cols-1 lg:grid-cols-[1fr_1fr]">
         {/* Left: copy */}
         <div>
           <p
@@ -68,12 +67,13 @@ export default function TryDemo() {
             ))}
           </ul>
 
-          <button
-            className="px-9 py-4 rounded-xl font-medium text-base transition-all hover:-translate-y-px"
+          <Link
+            href="/auth"
+            className="inline-flex px-9 py-4 rounded-xl font-medium text-base transition-all hover:-translate-y-px"
             style={{ background: "var(--emerald)", color: "var(--navy)" }}
           >
             Launch Demo →
-          </button>
+          </Link>
         </div>
 
         {/* Right: mock dashboard */}

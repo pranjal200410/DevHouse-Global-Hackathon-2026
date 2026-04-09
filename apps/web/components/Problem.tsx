@@ -45,7 +45,7 @@ export default function Problem() {
         >
           You signed up once.
           <br />
-          They've been charging you since.
+          They&apos;ve been charging you since.
         </h2>
 
         <p

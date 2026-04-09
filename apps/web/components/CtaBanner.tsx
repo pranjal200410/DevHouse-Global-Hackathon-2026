@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function CtaBanner() {
   return (
     <section className="py-20 px-12 text-center">
@@ -21,16 +23,18 @@ export default function CtaBanner() {
           style={{ color: "rgba(248,249,251,0.5)" }}
         >
           No account needed. See the full product instantly with sample data — then sign
-          up only when you're ready.
+          up only when you&apos;re ready.
         </p>
         <div className="flex flex-wrap gap-4 justify-center">
-          <button
+          <Link
+            href="/auth"
             className="px-10 py-4 rounded-xl font-medium text-base transition-all hover:-translate-y-px"
             style={{ background: "var(--emerald)", color: "var(--navy)" }}
           >
             Try Demo Free
-          </button>
-          <button
+          </Link>
+          <Link
+            href="/auth"
             className="px-8 py-4 rounded-xl font-normal text-base transition-colors"
             style={{
               background: "transparent",
@@ -39,7 +43,7 @@ export default function CtaBanner() {
             }}
           >
             Create Account
-          </button>
+          </Link>
         </div>
       </div>
     </section>

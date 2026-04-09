@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 :root {
+  --navy: #0B1629;
+  --navy-mid: #132040;
+  --emerald: #1D9E75;
+  --emerald-light: #5DCAA5;
+  --amber: #EF9F27;
+  --amber-light: #FAC775;
+  --card-bg: #131F35;
+  --card-border: rgba(93, 202, 165, 0.18);
+
   --navy-950: #091528;
   --navy-900: #132445;
   --navy-700: #2f4f78;
@@ -14,15 +23,6 @@
   --amber-500: #f2a847;
   --rose-500: #f0656b;
   --paper: #f6f8fc;
-}
-
-.app-bg {
-  color: var(--navy-950);
-  background:
-    radial-gradient(circle at 3% 10%, rgba(15, 143, 111, 0.2) 0, rgba(15, 143, 111, 0) 35%),
-    radial-gradient(circle at 92% 5%, rgba(242, 168, 71, 0.26) 0, rgba(242, 168, 71, 0) 30%),
-    linear-gradient(180deg, #f9fbff 0%, #eef3fb 40%, #f8fbff 100%);
-  min-height: 100vh;
 }
 
 body {
@@ -41,6 +41,31 @@ body::before {
   background-size: 36px 36px;
   opacity: 0.35;
   z-index: -1;
+}
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+.text-cream {
+  color: #F8F9FB;
+}
+
+.bg-navy {
+  background-color: var(--navy);
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .display-title {
@@ -64,6 +89,15 @@ body::before {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.app-bg {
+  color: var(--navy-950);
+  background:
+    radial-gradient(circle at 3% 10%, rgba(15, 143, 111, 0.2) 0, rgba(15, 143, 111, 0) 35%),
+    radial-gradient(circle at 92% 5%, rgba(242, 168, 71, 0.26) 0, rgba(242, 168, 71, 0) 30%),
+    linear-gradient(180deg, #f9fbff 0%, #eef3fb 40%, #f8fbff 100%);
+  min-height: 100vh;
 }
 
 .eyebrow {

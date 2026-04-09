@@ -1,4 +1,4 @@
-"use client";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -18,21 +18,16 @@ export default function Navbar() {
         SubGuard
       </div>
 
-      <button
-        className="px-5 py-2 rounded-lg font-medium text-sm transition-colors"
+      <Link
+        href="/auth"
+        className="px-5 py-2 rounded-lg font-medium text-sm transition-colors hover:bg-[var(--emerald-light)]"
         style={{
           background: "var(--emerald)",
           color: "var(--navy)",
         }}
-        onMouseOver={(e) =>
-          ((e.target as HTMLButtonElement).style.background = "var(--emerald-light)")
-        }
-        onMouseOut={(e) =>
-          ((e.target as HTMLButtonElement).style.background = "var(--emerald)")
-        }
       >
         Try Demo — Free
-      </button>
+      </Link>
     </nav>
   );
 }
