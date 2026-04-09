@@ -8,7 +8,7 @@ import TryDemo from "@/components/TryDemo";
 
 export default function HomePage() {
   return (
-    <main className="bg-navy min-h-screen overflow-x-hidden font-sans">
+    <main className="min-h-screen overflow-x-hidden font-sans">
       <Navbar />
       <Hero />
       <Problem />

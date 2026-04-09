@@ -14,7 +14,7 @@ export function AppHeader({ title, subtitle, rightSlot }: AppHeaderProps) {
         <div>
           <p className="eyebrow">Subscription Cancellation Guarantee</p>
           <h1 className="display-title mt-2">{title}</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600 md:text-base">{subtitle}</p>
+          <p className="mt-2 max-w-2xl text-sm text-slate-300 md:text-base">{subtitle}</p>
         </div>
 
         <div className="flex items-center gap-2">{rightSlot}</div>

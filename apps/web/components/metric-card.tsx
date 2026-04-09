@@ -16,7 +16,7 @@ export function MetricCard({ label, value, helper, icon }: MetricCardProps) {
           <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
           {helper ? <p className="mt-2 text-sm text-slate-600">{helper}</p> : null}
         </div>
-        {icon ? <div className="rounded-xl bg-white p-2 text-slate-700 shadow-sm">{icon}</div> : null}
+        {icon ? <div className="rounded-xl bg-slate-800 p-2 text-white shadow-sm">{icon}</div> : null}
       </div>
     </article>
   );

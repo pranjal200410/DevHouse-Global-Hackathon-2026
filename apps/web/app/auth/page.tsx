@@ -55,7 +55,7 @@ export default function AuthPage() {
           <br />
           in under 10 seconds.
         </h1>
-        <p className="mt-4 max-w-lg text-sm text-slate-700 md:text-base">
+        <p className="mt-4 max-w-lg text-sm text-white md:text-base">
           Start with deterministic sample data and validate every API flow without external credentials.
           This demo session is isolated and resets cleanly on demand.
         </p>
@@ -70,12 +70,12 @@ export default function AuthPage() {
               <span className="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
                 {index + 1}
               </span>
-              <p className="text-sm text-slate-700">{item}</p>
+              <p className="text-sm text-white">{item}</p>
             </div>
           ))}
         </div>
 
-        <Link className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline" href="/">
+        <Link className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-white underline-offset-4 hover:text-slate-100 hover:underline" href="/">
           Back to landing
         </Link>
       </section>
@@ -83,19 +83,19 @@ export default function AuthPage() {
       <section className="glass-card reveal p-7 md:p-9" style={{ animationDelay: "120ms" }}>
         <div className="mb-6 flex items-center gap-3">
           <span className="inline-flex rounded-xl bg-white p-2 shadow-sm">
-            <LockKeyhole className="text-slate-700" size={18} />
+            <LockKeyhole className="text-white" size={18} />
           </span>
           <div>
             <h2 className="text-xl font-bold text-slate-900">Demo Login</h2>
-            <p className="text-sm text-slate-600">PIN defaults to 2026</p>
+            <p className="text-sm text-slate-300">PIN defaults to 2026</p>
           </div>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <label className="block text-sm font-semibold text-slate-700">
+          <label className="block text-sm font-semibold text-white">
             Email
             <input
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none ring-emerald-200 transition focus:ring"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-white outline-none ring-emerald-200 transition focus:ring"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -103,10 +103,10 @@ export default function AuthPage() {
             />
           </label>
 
-          <label className="block text-sm font-semibold text-slate-700">
+          <label className="block text-sm font-semibold text-white">
             PIN (required)
             <input
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none ring-emerald-200 transition focus:ring"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-white outline-none ring-emerald-200 transition focus:ring"
               type="password"
               value={pin}
               onChange={(event) => setPin(event.target.value)}

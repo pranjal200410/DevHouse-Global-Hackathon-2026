@@ -68,8 +68,8 @@ export default function Problem() {
               }}
             >
               <div className="text-xl mb-2">{icon}</div>
-              <div className="font-medium text-base mb-1">{title}</div>
-              <div className="text-sm leading-relaxed" style={{ color: "rgba(248,249,251,0.5)" }}>
+              <div className="font-medium text-base mb-1" style={{ color: "rgba(0,0,0,0.9)" }}>{title}</div>
+              <div className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.7)" }}>
                 {desc}
               </div>
             </div>

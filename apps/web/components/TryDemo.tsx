@@ -86,16 +86,6 @@ export default function TryDemo() {
         >
           <div className="flex items-center justify-between mb-4">
             <span className="font-display font-bold text-sm">My Subscriptions</span>
-            <span
-              className="text-xs px-3 py-0.5 rounded-full"
-              style={{
-                background: "rgba(29,158,117,0.15)",
-                color: "#5DCAA5",
-                border: "0.5px solid rgba(29,158,117,0.3)",
-              }}
-            >
-              Demo Mode
-            </span>
           </div>
 
           {mockSubs.map((sub, i) => (
