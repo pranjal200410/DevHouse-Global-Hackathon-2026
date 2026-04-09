@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0B1629;
+  --navy-mid: #132040;
+  --emerald: #1D9E75;
+  --emerald-light: #5DCAA5;
+  --amber: #EF9F27;
+  --amber-light: #FAC775;
+  --card-bg: #131F35;
+  --card-border: rgba(93, 202, 165, 0.18);
+}
+
+@layer base {
+  body {
+    background-color: var(--navy);
+    color: #F8F9FB;
+    font-family: 'DM Sans', sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* Step connector line */
+  .step-connector::after {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 56px;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(29, 158, 117, 0.4), rgba(29, 158, 117, 0.05));
+  }
+
+  /* Pulsing dot animation */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 2s infinite;
+  }
+}
