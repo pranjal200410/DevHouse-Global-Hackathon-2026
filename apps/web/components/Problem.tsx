@@ -1,23 +1,27 @@
-const painPoints = [
+import { Card } from "./ui/Card";
+import { Section } from "./ui/Section";
+import { ShieldAlert, EyeOff, CreditCard, Clock } from "lucide-react";
+
+const problemItems = [
   {
-    icon: "🚫",
-    title: "No-warning renewals",
-    desc: "Merchants legally bury renewal dates in fine print and email spam.",
+    title: "Hidden renewals",
+    description: "Most subscriptions renew automatically without warning, creating surprise charges on your card.",
+    icon: <ShieldAlert size={20} />,
   },
   {
-    icon: "🔒",
-    title: "Cancellation walls",
-    desc: 'Multi-step flows, dark patterns, and "chat to cancel" traps designed to wear you down.',
+    title: "Forgotten plans",
+    description: "Users keep paying for services they stopped using weeks or months ago.",
+    icon: <EyeOff size={20} />,
   },
   {
-    icon: "📊",
-    title: "No paper trail",
-    desc: "Banks reject disputes without timestamps, screenshots, and documented attempts.",
+    title: "Unexpected charges",
+    description: "Renewals often appear after a trial ends, making budgets harder to control.",
+    icon: <CreditCard size={20} />,
   },
   {
-    icon: "🕰",
-    title: "Short dispute windows",
-    desc: "Chargeback rights expire in 60–120 days. Most people discover too late.",
+    title: "Slow dispute paths",
+    description: "Without clear proof, chargebacks become stressful and time-consuming.",
+    icon: <Clock size={20} />,
   },
 ];
 

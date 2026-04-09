@@ -1,17 +1,10 @@
 import Link from "next/link";
 
 const perks = [
-  "10 real-looking subscriptions pre-loaded",
-  "3 upcoming renewals on the risk calendar",
-  "1 live charge incident ready to dispute",
-  "No account, no email, no credit card",
-];
-
-const mockSubs = [
-  { name: "Netflix Premium", date: "Renews Apr 14", amount: "$22.99", risk: "High risk", riskStyle: { color: "#F09595", background: "rgba(226,75,74,0.12)" } },
-  { name: "Adobe CC", date: "Renews Apr 22", amount: "$54.99", risk: "Review", riskStyle: { color: "#FAC775", background: "rgba(239,159,39,0.12)" } },
-  { name: "Spotify Family", date: "Renews May 3", amount: "$16.99", risk: "Protected", riskStyle: { color: "#5DCAA5", background: "rgba(29,158,117,0.12)" } },
-  { name: "Dropbox Plus", date: "Renews May 10", amount: "$9.99", risk: "Protected", riskStyle: { color: "#5DCAA5", background: "rgba(29,158,117,0.12)" } },
+  "10 realistic subscriptions",
+  "Live renewal calendar",
+  "Full cancellation flow",
+  "No signup required",
 ];
 
 export default function TryDemo() {
@@ -34,7 +27,11 @@ export default function TryDemo() {
           </p>
           <h2
             className="font-display font-bold leading-snug mb-4"
-            style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)", letterSpacing: "-0.02em" }}
+            style={{
+              fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
+              letterSpacing: "-0.02em",
+              color: "white",
+            }}
           >
             See your subscriptions
             <br />
@@ -86,44 +83,58 @@ export default function TryDemo() {
         >
           <div className="flex items-center justify-between mb-4">
             <span className="font-display font-bold text-sm">My Subscriptions</span>
-          </div>
-
-          {mockSubs.map((sub, i) => (
-            <div
-              key={sub.name}
-              className="flex items-center justify-between py-3"
+            <span
+              className="px-2 py-1 rounded-full text-xs font-medium"
               style={{
-                borderBottom: i < mockSubs.length - 1 ? "0.5px solid rgba(255,255,255,0.07)" : "none",
+                background: "rgba(239,159,39,0.1)",
+                color: "var(--amber)",
+                border: "1px solid rgba(239,159,39,0.2)",
               }}
             >
-              <div>
-                <div className="font-medium text-sm">{sub.name}</div>
-                <div className="text-xs mt-0.5" style={{ color: "rgba(248,249,251,0.38)" }}>
-                  {sub.date}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-medium text-sm">{sub.amount}</div>
-                <div
-                  className="text-xs rounded px-2 mt-0.5 inline-block"
-                  style={sub.riskStyle}
-                >
-                  {sub.risk}
-                </div>
-              </div>
-            </div>
-          ))}
+              Demo Mode
+            </span>
+          </div>
 
-          <div
-            className="flex justify-between mt-4 pt-4"
-            style={{ borderTop: "0.5px solid rgba(255,255,255,0.1)" }}
-          >
-            <span className="text-sm" style={{ color: "rgba(248,249,251,0.45)" }}>
-              Monthly exposure
-            </span>
-            <span className="font-display font-bold" style={{ color: "var(--amber)" }}>
-              $247.83 / mo
-            </span>
+          <div className="space-y-3">
+            {[
+              { name: "Netflix", price: "$15.99", renews: "Dec 15", status: "Active" },
+              { name: "Spotify", price: "$9.99", renews: "Dec 20", status: "Active" },
+              { name: "Adobe Creative", price: "$52.99", renews: "Jan 5", status: "Trial" },
+              { name: "AWS", price: "$29.99", renews: "Dec 28", status: "Active" },
+            ].map((sub) => (
+              <div
+                key={sub.name}
+                className="flex items-center justify-between p-3 rounded-lg"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                    style={{ background: "rgba(255,255,255,0.1)" }}
+                  >
+                    {sub.name[0]}
+                  </div>
+                  <div>
+                    <div className="font-medium" style={{ color: "white" }}>{sub.name}</div>
+                    <div className="text-xs" style={{ color: "rgba(248,249,251,0.5)" }}>
+                      Renews {sub.renews}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-medium" style={{ color: "white" }}>{sub.price}</div>
+                  <div
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      sub.status === "Trial"
+                        ? "bg-amber-500/20 text-amber-300"
+                        : "bg-emerald-500/20 text-emerald-300"
+                    }`}
+                  >
+                    {sub.status}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
