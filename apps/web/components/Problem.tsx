@@ -47,18 +47,21 @@ export default function Problem() {
           className="font-display font-bold leading-snug max-w-2xl mb-5"
           style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)", letterSpacing: "-0.02em" }}
         >
-          You signed up once.
-          <br />
-          They&apos;ve been charging you since.
+          Money You Don&apos;t Remember Spending
         </h2>
+
+        <p
+          className="font-light leading-relaxed max-w-2xl mb-6"
+          style={{ fontSize: "1rem", color: "rgba(248,249,251,0.6)" }}
+        >
+          You sign up. You try it once. Life gets busy. Then you see a charge on your card. Another the next month. You're paying for something you haven't used in months. It's not a lot each time. But it adds up fast. And it keeps happening because companies count on you forgetting.
+        </p>
 
         <p
           className="font-light leading-relaxed max-w-2xl mb-10"
           style={{ fontSize: "1rem", color: "rgba(248,249,251,0.6)" }}
         >
-          Subscription services are designed to be forgotten. Free trials flip to paid
-          without warning. Annual plans renew while you sleep. By the time you notice, the
-          charge has cleared — and the window to dispute it has nearly closed.
+          The system is rigged against you. Trial dates turn into paid charges without warning. Renewal dates are hidden. You don't get reminders. By the time you catch it, weeks of charges have already gone through. You need one place that shows every subscription you have, warns you before they charge, and lets you kill them instantly.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
