@@ -62,17 +62,17 @@ const steps: Step[] = [
     title: "Dispute-ready evidence in one click",
     desc: "Generate a timestamped evidence PDF with cancellation screenshots, email threads, and charge records — formatted for your bank's chargeback process.",
     numStyle: {
-      background: "rgba(248,249,251,0.06)",
-      border: "1.5px solid rgba(248,249,251,0.3)",
+      background: "rgba(19,31,53,0.88)",
+      border: "1.5px solid rgba(93,202,165,0.18)",
       color: "#F8F9FB",
     },
-    verbColor: "rgba(248,249,251,0.5)",
+    verbColor: "#F8F9FB",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-20 px-12">
+    <section id="how-it-works" className="py-20 px-12">
       <div className="max-w-5xl mx-auto mb-14">
         <p
           className="text-xs uppercase tracking-widest font-medium mb-4"

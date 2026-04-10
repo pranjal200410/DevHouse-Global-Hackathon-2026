@@ -4,6 +4,8 @@ export type BillingCycle = "monthly" | "yearly";
 export type RenewalStatus = "charged" | "blocked" | "disputed";
 export type CancellationState = "not-started" | "in-progress" | "completed";
 export type DisputeStatus = "draft" | "submitted" | "won" | "lost";
+export type AlertSeverity = "low" | "medium" | "high";
+export type AlertType = "renewal-risk" | "blocked-charge" | "dispute" | "cancellation-followup";
 
 export interface User {
   id: string;
@@ -106,4 +108,53 @@ export interface SubscriptionDetail {
     canCancel: boolean;
     canBlock: boolean;
   };
+}
+
+export interface CancellationCenterItem {
+  cancellationId: string;
+  subscriptionId: string;
+  merchant: string;
+  amount: number;
+  method: Subscription["cancelMethod"];
+  state: CancellationState;
+  requestedAt: string;
+  completedAt: string | null;
+  nextAction: string;
+  progressPercent: number;
+  riskLevel: RiskLevel;
+  steps: string[];
+}
+
+export interface ProtectionControlItem {
+  subscriptionId: string;
+  merchant: string;
+  amount: number;
+  riskLevel: RiskLevel;
+  status: SubscriptionStatus;
+  nextRenewalDate: string | null;
+  autoBlockEnabled: boolean;
+  updatedAt: string | null;
+}
+
+export interface ProtectionControlsPayload {
+  summary: {
+    totalTracked: number;
+    activeProtections: number;
+    highRiskUnprotected: number;
+    nextProtectedRenewal: string | null;
+  };
+  controls: ProtectionControlItem[];
+}
+
+export interface AlertFeedItem {
+  id: string;
+  type: AlertType;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  actionLabel: string;
+  actionHref: string;
+  occurredAt: string;
+  subscriptionId?: string;
+  merchant?: string;
 }

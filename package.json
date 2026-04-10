@@ -13,10 +13,16 @@
     "build": "npm run build:api && npm run build:web",
     "typecheck:api": "npm --prefix apps/api run typecheck",
     "qa:api": "npm --prefix apps/api run qa:contracts",
+    "qa:e2e": "npm --prefix apps/web run e2e",
     "test:api": "npm --prefix apps/api run test",
     "lint:web": "npm --prefix apps/web run lint",
     "verify": "npm run typecheck:api && npm run qa:api && npm run lint:web && npm run build:web",
-    "test": "npm run verify && npm run test:api"
+    "test": "npm run verify && npm run test:api",
+    "health:api": "curl -f http://localhost:4000/health",
+    "health:smoke": "node scripts/health-check.mjs",
+    "docker:build": "docker compose -f docker/docker-compose.yml build",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down"
   },
   "repository": {
     "type": "git",

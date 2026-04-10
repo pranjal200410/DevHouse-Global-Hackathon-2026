@@ -1,5 +1,7 @@
 export type RiskLevel = "low" | "medium" | "high";
 export type SubscriptionStatus = "active" | "canceling" | "cancelled";
+export type AlertSeverity = "low" | "medium" | "high";
+export type AlertType = "renewal-risk" | "blocked-charge" | "dispute" | "cancellation-followup";
 
 export interface User {
   id: string;
@@ -89,6 +91,55 @@ export interface RenewalCalendarItem {
   riskLevel: RiskLevel;
   riskColor: "emerald" | "amber" | "rose";
   status: SubscriptionStatus;
+}
+
+export interface CancellationCenterItem {
+  cancellationId: string;
+  subscriptionId: string;
+  merchant: string;
+  amount: number;
+  method: Subscription["cancelMethod"];
+  state: CancellationRecord["state"];
+  requestedAt: string;
+  completedAt: string | null;
+  nextAction: string;
+  progressPercent: number;
+  riskLevel: RiskLevel;
+  steps: string[];
+}
+
+export interface ProtectionControlItem {
+  subscriptionId: string;
+  merchant: string;
+  amount: number;
+  riskLevel: RiskLevel;
+  status: SubscriptionStatus;
+  nextRenewalDate: string | null;
+  autoBlockEnabled: boolean;
+  updatedAt: string | null;
+}
+
+export interface ProtectionControlsPayload {
+  summary: {
+    totalTracked: number;
+    activeProtections: number;
+    highRiskUnprotected: number;
+    nextProtectedRenewal: string | null;
+  };
+  controls: ProtectionControlItem[];
+}
+
+export interface AlertFeedItem {
+  id: string;
+  type: AlertType;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  actionLabel: string;
+  actionHref: string;
+  occurredAt: string;
+  subscriptionId?: string;
+  merchant?: string;
 }
 
 interface ApiSuccess<T> {

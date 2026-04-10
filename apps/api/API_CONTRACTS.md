@@ -166,3 +166,67 @@ Returns upcoming charge events with risk color:
 - `emerald` for low risk
 - `amber` for medium risk
 - `rose` for high risk
+
+## Screen 10: Cancellation Center
+
+### GET `/v1/cancellations/center`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns cancellation center rows with:
+
+- `merchant`
+- `method`
+- `state`
+- `progressPercent`
+- `nextAction`
+- `steps`
+
+## Screen 11: Protection Controls
+
+### GET `/v1/protection-controls`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns:
+
+- `summary`
+- `controls[]`
+
+Each control contains:
+
+- `subscriptionId`
+- `merchant`
+- `riskLevel`
+- `nextRenewalDate`
+- `autoBlockEnabled`
+
+### POST `/v1/protection-controls/:id`
+
+Headers: `Authorization: Bearer <token>`
+
+Request body:
+
+```json
+{
+  "enabled": true
+}
+```
+
+Updates Auto-Block for the selected subscription and returns refreshed protection payload.
+
+## Screen 13: Alerts & Incident Feed
+
+### GET `/v1/alerts/feed`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns severity-coded alert timeline with:
+
+- `type` (`renewal-risk|blocked-charge|dispute|cancellation-followup`)
+- `severity` (`low|medium|high`)
+- `title`
+- `message`
+- `actionLabel`
+- `actionHref`
+- `occurredAt`

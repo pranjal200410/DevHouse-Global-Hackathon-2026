@@ -13,8 +13,9 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Subscription Cancellation Guarantee",
-  description: "Detect, cancel, block, and prove hidden subscription renewals.",
+  title: "SubGuard — Stop Losing Money to Forgotten Subscriptions",
+  description:
+    "SubGuard detects hidden renewals, predicts charges before they hit, and generates dispute-ready proof in seconds.",
 };
 
 export default function RootLayout({
@@ -24,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${spaceGrotesk.variable} app-bg min-h-screen`}>{children}</body>
+      <body className={`${manrope.variable} ${spaceGrotesk.variable} app-bg min-h-screen`}>
+        {children}
+      </body>
     </html>
   );
 }

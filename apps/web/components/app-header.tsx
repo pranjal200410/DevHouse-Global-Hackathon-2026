@@ -14,7 +14,7 @@ export function AppHeader({ title, subtitle, rightSlot }: AppHeaderProps) {
         <div>
           <p className="eyebrow">Subscription Cancellation Guarantee</p>
           <h1 className="display-title mt-2">{title}</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600 md:text-base">{subtitle}</p>
+          <p className="mt-2 max-w-2xl text-sm text-slate-300 md:text-base">{subtitle}</p>
         </div>
 
         <div className="flex items-center gap-2">{rightSlot}</div>
@@ -23,6 +23,15 @@ export function AppHeader({ title, subtitle, rightSlot }: AppHeaderProps) {
       <nav className="mt-6 flex flex-wrap gap-2">
         <Link className="nav-pill" href="/dashboard">
           Dashboard
+        </Link>
+        <Link className="nav-pill" href="/cancellations">
+          Cancellation Center
+        </Link>
+        <Link className="nav-pill" href="/protection">
+          Protection Controls
+        </Link>
+        <Link className="nav-pill" href="/alerts">
+          Alerts Feed
         </Link>
         <Link className="nav-pill" href="/renewals">
           Renewal Calendar

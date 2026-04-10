@@ -53,10 +53,13 @@ This project solves that exact problem by making the full cancellation workflow 
 ## Core Demo Journey
 
 1. Open landing page and understand value in under 10 seconds.
-2. Login via demo auth with email + optional PIN.
+2. Login via demo auth with email + required PIN.
 3. View dashboard metrics and high-risk subscriptions.
 4. Open subscription detail, start cancellation, complete cancellation, and toggle auto-block.
-5. Review renewal calendar and future charge exposure.
+5. Use Cancellation Center (Screen 10) to manage guided cancellation progress.
+6. Use Protection Controls (Screen 11) to toggle Auto-Block status.
+7. Review Alerts & Incident Feed (Screen 13) for severity-based triage.
+8. Review renewal calendar and future charge exposure.
 
 ## Architecture Snapshot
 
@@ -90,6 +93,13 @@ Base URL: http://localhost:4000
 	- POST /v1/subscriptions/:id/block
 - Renewals
 	- GET /v1/renewals/calendar
+- Cancellation Center (Screen 10)
+	- GET /v1/cancellations/center
+- Protection Controls (Screen 11)
+	- GET /v1/protection-controls
+	- POST /v1/protection-controls/:id
+- Alerts Feed (Screen 13)
+	- GET /v1/alerts/feed
 
 Full contract documentation: apps/api/API_CONTRACTS.md
 
@@ -170,6 +180,10 @@ From root:
 - npm run dev           -> run API + web together
 - npm run verify        -> typecheck + API contract smoke + web lint + web build
 - npm run build         -> build API and web
+- npm run qa:e2e        -> run Playwright demo journey checks
+- npm run docker:build  -> build production containers
+- npm run docker:up     -> run API + web with health checks in Docker
+- npm run health:smoke  -> verify local API + web health endpoints
 
 ## Judge-Friendly Quick Test
 
@@ -177,15 +191,16 @@ From root:
 2. Open http://localhost:3000.
 3. Login and go to dashboard.
 4. Open one subscription detail.
-5. Click Start Cancellation.
-6. Click Mark as Completed.
-7. Open Renewal Calendar.
+5. Open Cancellation Center and complete one pending flow.
+6. Open Protection Controls and toggle one Auto-Block setting.
+7. Open Alerts Feed and inspect one high-severity incident.
+8. Open Renewal Calendar.
 
 This validates key business value in less than 2 minutes.
 
 ## Tech Stack
 
-- Frontend: Next.js 14, React 18, TypeScript, Tailwind CSS, Zustand
+- Frontend: Next.js 16, React 18, TypeScript, Tailwind CSS, Zustand
 - Backend: Fastify, TypeScript, Zod validation
 - Data Modeling: Prisma schema
 - Tooling: npm scripts, contract smoke checks

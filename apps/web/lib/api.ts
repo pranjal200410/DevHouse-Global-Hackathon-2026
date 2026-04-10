@@ -1,6 +1,9 @@
 import type {
+  AlertFeedItem,
+  CancellationCenterItem,
   ApiEnvelope,
   DashboardSummary,
+  ProtectionControlsPayload,
   RenewalCalendarItem,
   SessionResponse,
   Subscription,
@@ -136,6 +139,35 @@ export const setAutoBlock = async (
 
 export const getRenewalCalendar = async (token: string): Promise<RenewalCalendarItem[]> =>
   request<RenewalCalendarItem[]>("/v1/renewals/calendar", {
+    method: "GET",
+    token,
+  });
+
+export const getCancellationCenter = async (token: string): Promise<CancellationCenterItem[]> =>
+  request<CancellationCenterItem[]>("/v1/cancellations/center", {
+    method: "GET",
+    token,
+  });
+
+export const getProtectionControls = async (token: string): Promise<ProtectionControlsPayload> =>
+  request<ProtectionControlsPayload>("/v1/protection-controls", {
+    method: "GET",
+    token,
+  });
+
+export const updateProtectionControl = async (
+  token: string,
+  subscriptionId: string,
+  enabled: boolean,
+): Promise<ProtectionControlsPayload> =>
+  request<ProtectionControlsPayload>(`/v1/protection-controls/${subscriptionId}`, {
+    method: "POST",
+    token,
+    body: JSON.stringify({ enabled }),
+  });
+
+export const getAlertsFeed = async (token: string): Promise<AlertFeedItem[]> =>
+  request<AlertFeedItem[]>("/v1/alerts/feed", {
     method: "GET",
     token,
   });
