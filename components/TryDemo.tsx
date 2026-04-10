@@ -1,3 +1,7 @@
+'use client';
+
+import React from 'react';
+
 const perks = [
   "10 real-looking subscriptions pre-loaded",
   "3 upcoming renewals on the risk calendar",

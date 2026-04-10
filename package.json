@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/pranjal200410/DevHouse-Global-Hackathon-2026#readme",
   "devDependencies": {
+    "@types/react": "^19.2.14",
     "concurrently": "^9.2.1",
     "wait-on": "^9.0.4"
   }
