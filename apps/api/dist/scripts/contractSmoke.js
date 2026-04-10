@@ -87,6 +87,43 @@ const main = async () => {
         strict_1.default.equal(calendar.statusCode, 200, "renewal calendar endpoint failed");
         const calendarBody = calendar.json();
         strict_1.default.ok(calendarBody.data.length >= 3, "expected at least 3 upcoming renewal events");
+        const cancellationCenter = await app.inject({
+            method: "GET",
+            url: "/v1/cancellations/center",
+            headers: authHeaders,
+        });
+        strict_1.default.equal(cancellationCenter.statusCode, 200, "cancellation center endpoint failed");
+        const cancellationCenterBody = cancellationCenter.json();
+        strict_1.default.ok(cancellationCenterBody.data.length >= 1, "expected cancellation center rows");
+        strict_1.default.ok(cancellationCenterBody.data.every((row) => row.progressPercent >= 0 && row.progressPercent <= 100), "invalid cancellation progress values");
+        const protectionControls = await app.inject({
+            method: "GET",
+            url: "/v1/protection-controls",
+            headers: authHeaders,
+        });
+        strict_1.default.equal(protectionControls.statusCode, 200, "protection controls endpoint failed");
+        const protectionBody = protectionControls.json();
+        strict_1.default.ok(protectionBody.data.controls.length >= 1, "expected protection controls");
+        const controlTarget = protectionBody.data.controls[0];
+        strict_1.default.ok(controlTarget?.subscriptionId, "missing protection control target id");
+        const protectionUpdate = await app.inject({
+            method: "POST",
+            url: `/v1/protection-controls/${controlTarget.subscriptionId}`,
+            headers: authHeaders,
+            payload: {
+                enabled: !controlTarget.autoBlockEnabled,
+            },
+        });
+        strict_1.default.equal(protectionUpdate.statusCode, 200, "protection update endpoint failed");
+        const alertsFeed = await app.inject({
+            method: "GET",
+            url: "/v1/alerts/feed",
+            headers: authHeaders,
+        });
+        strict_1.default.equal(alertsFeed.statusCode, 200, "alerts feed endpoint failed");
+        const alertsBody = alertsFeed.json();
+        strict_1.default.ok(alertsBody.data.length >= 1, "expected at least one alert");
+        strict_1.default.ok(alertsBody.data.every((alert) => ["low", "medium", "high"].includes(alert.severity)), "alerts feed returned invalid severity");
         console.log("API contract smoke checks passed.");
     }
     finally {

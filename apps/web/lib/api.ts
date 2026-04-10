@@ -119,12 +119,14 @@ export const startCancellation = async (token: string, subscriptionId: string): 
   request<SubscriptionDetail>(`/v1/subscriptions/${subscriptionId}/cancel`, {
     method: "POST",
     token,
+    body: JSON.stringify({}),
   });
 
 export const completeCancellation = async (token: string, subscriptionId: string): Promise<SubscriptionDetail> =>
   request<SubscriptionDetail>(`/v1/subscriptions/${subscriptionId}/cancel/complete`, {
     method: "POST",
     token,
+    body: JSON.stringify({}),
   });
 
 export const setAutoBlock = async (
