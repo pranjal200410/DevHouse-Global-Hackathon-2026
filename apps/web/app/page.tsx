@@ -3,8 +3,8 @@ import Footer from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
 import { Navbar } from "@/components/Navbar";
-import Problem from "@/components/Problem";
-import TryDemo from "@/components/TryDemo";
+import { Problem } from "@/components/Problem";
+import { TryDemo } from "@/components/TryDemo";
 
 export default function HomePage() {
   return (

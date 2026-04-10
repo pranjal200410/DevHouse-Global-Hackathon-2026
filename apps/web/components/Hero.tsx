@@ -35,8 +35,8 @@ export function Hero() {
               Try Demo
               <ArrowRight size={16} />
             </Button>
-            <Button as={Link} href="/dashboard" variant="secondary">
-              View dashboard preview
+            <Button as={Link} href="/auth" variant="secondary">
+              Explore live dashboard
             </Button>
           </div>
           <div className="mt-10 grid gap-3 sm:grid-cols-3">

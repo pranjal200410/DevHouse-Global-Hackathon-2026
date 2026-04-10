@@ -10,11 +10,14 @@ This app is designed for demo clarity: judges should understand the value quickl
 - Demo login with low friction
 - Dashboard with spend + risk summary
 - Subscription detail with cancellation action flow
+- Cancellation center with guided progress actions
+- Protection controls for Auto-Block toggles
+- Alerts feed with severity-coded incidents
 - Renewal calendar with risk color coding
 
 ## Tech Stack
 
-- Next.js 14 (App Router)
+- Next.js 16 (App Router)
 - React 18
 - TypeScript
 - Tailwind CSS
@@ -26,6 +29,9 @@ This app is designed for demo clarity: judges should understand the value quickl
 - /auth                 -> demo authentication
 - /dashboard            -> portfolio summary and subscription overview
 - /subscriptions/[id]   -> subscription-level operations and history
+- /cancellations        -> guided cancellation center (screen 10)
+- /protection           -> auto-block protection controls (screen 11)
+- /alerts               -> alerts and incident feed (screen 13)
 - /renewals             -> upcoming renewal timeline
 
 ## 5-Minute Frontend Setup
@@ -63,6 +69,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:4000 npm --prefix apps/web run dev
 ```bash
 npm --prefix apps/web run lint
 npm --prefix apps/web run build
+npm --prefix apps/web run e2e
 ```
 
 Both commands should pass before demo day.
