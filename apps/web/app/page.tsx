@@ -1,8 +1,8 @@
 import CtaBanner from "@/components/CtaBanner";
 import Footer from "@/components/Footer";
-import Hero from "@/components/Hero";
+import { Hero } from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/Navbar";
 import Problem from "@/components/Problem";
 import TryDemo from "@/components/TryDemo";
 

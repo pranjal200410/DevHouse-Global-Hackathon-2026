@@ -16,12 +16,19 @@ export function Hero() {
       <div className="pointer-events-none absolute right-0 top-0 hidden h-96 w-96 rounded-full bg-amber-400/5 blur-3xl lg:block" />
       <div className="relative grid gap-12 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
         <div className="max-w-2xl">
-          <Badge>Premium audit</Badge>
-          <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
-            Detect. Cancel. Block. Prove.
-          </h1>
+         
+           <h1
+        className="font-display font-extrabold leading-none tracking-tight mb-5 md:mb-6 animate-fade-up"
+        style={{ fontSize: "clamp(2rem, 6vw, 3.8rem)", letterSpacing: "-0.03em" }}
+      >
+        Stop losing money to{" "}
+        <br className="hidden sm:block" />
+        <span style={{ color: "var(--emerald-light)" }}>forgotten</span>{" "}subscriptions
+        <br className="hidden sm:block" />
+        and <span style={{ color: "var(--amber)" }}>dark patterns.</span>
+      </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
-            Stop losing money to hidden subscription renewals. See the full picture in seconds with a demo dashboard built for financial clarity.
+            SubGuard detects hidden renewals,predicts charges before they hit,and generates dispute-ready proof in seconds-no login needed to see it work.
           </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
             <Button as={Link} href="/auth" variant="primary">
