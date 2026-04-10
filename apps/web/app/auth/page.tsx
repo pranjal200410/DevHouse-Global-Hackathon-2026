@@ -55,7 +55,7 @@ export default function AuthPage() {
           <br />
           in under 10 seconds.
         </h1>
-        <p className="mt-4 max-w-lg text-sm text-white md:text-base">
+        <p className="mt-4 max-w-lg text-sm text-slate-300 md:text-base">
           Start with deterministic sample data and validate every API flow without external credentials.
           This demo session is isolated and resets cleanly on demand.
         </p>
@@ -67,35 +67,35 @@ export default function AuthPage() {
             "Session state persisted in client store for app navigation",
           ].map((item, index) => (
             <div key={item} className="surface-muted reveal flex items-start gap-3 p-3" style={{ animationDelay: `${140 + index * 80}ms` }}>
-              <span className="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
+              <span className="mt-1 inline-flex size-5 items-center justify-center rounded-full bg-emerald-500/20 text-xs font-bold text-emerald-200">
                 {index + 1}
               </span>
-              <p className="text-sm text-white">{item}</p>
+              <p className="text-sm text-slate-300">{item}</p>
             </div>
           ))}
         </div>
 
-        <Link className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-white underline-offset-4 hover:text-slate-100 hover:underline" href="/">
+        <Link className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-300 underline-offset-4 hover:text-slate-100 hover:underline" href="/">
           Back to landing
         </Link>
       </section>
 
       <section className="glass-card reveal p-7 md:p-9" style={{ animationDelay: "120ms" }}>
         <div className="mb-6 flex items-center gap-3">
-          <span className="inline-flex rounded-xl bg-white p-2 shadow-sm">
-            <LockKeyhole className="text-white" size={18} />
+          <span className="inline-flex rounded-xl bg-slate-900/80 p-2 shadow-sm shadow-emerald-500/10">
+            <LockKeyhole className="text-emerald-300" size={18} />
           </span>
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Demo Login</h2>
+            <h2 className="text-xl font-bold text-slate-100">Demo Login</h2>
             <p className="text-sm text-slate-300">PIN defaults to 2026</p>
           </div>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <label className="block text-sm font-semibold text-white">
+          <label className="block text-sm font-semibold text-slate-200">
             Email
             <input
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-white outline-none ring-emerald-200 transition focus:ring"
+              className="mt-2 w-full rounded-xl border border-slate-600/60 bg-slate-900/80 px-4 py-3 text-slate-100 outline-none ring-emerald-300/40 transition focus:ring"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -103,10 +103,10 @@ export default function AuthPage() {
             />
           </label>
 
-          <label className="block text-sm font-semibold text-white">
+          <label className="block text-sm font-semibold text-slate-200">
             PIN (required)
             <input
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-white outline-none ring-emerald-200 transition focus:ring"
+              className="mt-2 w-full rounded-xl border border-slate-600/60 bg-slate-900/80 px-4 py-3 text-slate-100 outline-none ring-emerald-300/40 transition focus:ring"
               type="password"
               value={pin}
               onChange={(event) => setPin(event.target.value)}
@@ -118,13 +118,13 @@ export default function AuthPage() {
             />
           </label>
 
-          {error ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
+          {error ? <p className="rounded-lg bg-rose-500/15 px-3 py-2 text-sm text-rose-200">{error}</p> : null}
 
           <button className="cta-primary w-full" disabled={loading} type="submit">
             {loading ? "Signing in..." : "Enter Demo Workspace"}
           </button>
 
-          <p className="flex items-center gap-2 text-xs text-slate-500">
+          <p className="flex items-center gap-2 text-xs text-slate-400">
             <Sparkles size={14} />
             No external credentials required. Demo data is deterministic.
           </p>

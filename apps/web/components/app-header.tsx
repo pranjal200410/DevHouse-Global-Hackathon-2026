@@ -24,6 +24,15 @@ export function AppHeader({ title, subtitle, rightSlot }: AppHeaderProps) {
         <Link className="nav-pill" href="/dashboard">
           Dashboard
         </Link>
+        <Link className="nav-pill" href="/cancellations">
+          Cancellation Center
+        </Link>
+        <Link className="nav-pill" href="/protection">
+          Protection Controls
+        </Link>
+        <Link className="nav-pill" href="/alerts">
+          Alerts Feed
+        </Link>
         <Link className="nav-pill" href="/renewals">
           Renewal Calendar
         </Link>

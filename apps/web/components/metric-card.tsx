@@ -12,11 +12,11 @@ export function MetricCard({ label, value, helper, icon }: MetricCardProps) {
     <article className="glass-card reveal p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
-          {helper ? <p className="mt-2 text-sm text-slate-600">{helper}</p> : null}
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-slate-100">{value}</p>
+          {helper ? <p className="mt-2 text-sm text-slate-300">{helper}</p> : null}
         </div>
-        {icon ? <div className="rounded-xl bg-slate-800 p-2 text-white shadow-sm">{icon}</div> : null}
+        {icon ? <div className="rounded-xl bg-slate-900/80 p-2 text-emerald-300 shadow-sm shadow-emerald-500/10">{icon}</div> : null}
       </div>
     </article>
   );

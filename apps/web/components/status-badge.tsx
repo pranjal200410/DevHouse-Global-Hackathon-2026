@@ -6,11 +6,11 @@ interface StatusBadgeProps {
 }
 
 const toneClassMap: Record<StatusBadgeProps["tone"], string> = {
-  slate: "bg-slate-100 text-white border-slate-200",
-  emerald: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  amber: "bg-amber-100 text-amber-800 border-amber-200",
-  rose: "bg-rose-100 text-rose-800 border-rose-200",
-  blue: "bg-blue-100 text-blue-800 border-blue-200",
+  slate: "bg-slate-800/80 text-slate-200 border-slate-600/60",
+  emerald: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30",
+  amber: "bg-amber-500/15 text-amber-200 border-amber-400/30",
+  rose: "bg-rose-500/15 text-rose-200 border-rose-400/30",
+  blue: "bg-cyan-500/15 text-cyan-200 border-cyan-400/30",
 };
 
 export function StatusBadge({ label, tone }: StatusBadgeProps) {

@@ -88,12 +88,12 @@ export default function RenewalsPage() {
         }
       />
 
-      {error ? <p className="glass-card rounded-xl px-4 py-3 text-sm text-rose-700">{error}</p> : null}
+      {error ? <p className="glass-card rounded-xl px-4 py-3 text-sm text-rose-300">{error}</p> : null}
 
       <section className="grid gap-4 md:grid-cols-[1fr_1.2fr]">
         <article className="glass-card reveal p-6" style={{ animationDelay: "80ms" }}>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Screen 9 - Renewal Calendar</p>
-          <div className="mt-3 flex items-center gap-2 text-white">
+          <div className="mt-3 flex items-center gap-2 text-slate-100">
             <CalendarDays size={18} />
             <h2 className="text-xl font-bold">Upcoming Exposure</h2>
           </div>
@@ -102,7 +102,7 @@ export default function RenewalsPage() {
             <p className="mt-4 text-sm text-slate-300">Loading calendar...</p>
           ) : (
             <>
-              <p className="mt-4 text-4xl font-bold text-white">{formatCurrency(totalUpcomingExposure)}</p>
+              <p className="mt-4 text-4xl font-bold text-slate-100">{formatCurrency(totalUpcomingExposure)}</p>
               <p className="mt-2 text-sm text-slate-300">Potential amount to be charged over the next cycle.</p>
 
               <div className="mt-6 space-y-2">
@@ -124,7 +124,7 @@ export default function RenewalsPage() {
         </article>
 
         <article className="glass-card reveal p-6" style={{ animationDelay: "120ms" }}>
-          <h3 className="text-lg font-semibold text-white">Charge Timeline</h3>
+          <h3 className="text-lg font-semibold text-slate-100">Charge Timeline</h3>
 
           <div className="mt-4 space-y-3">
             {events.map((event, index) => (
@@ -135,18 +135,18 @@ export default function RenewalsPage() {
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-semibold text-white">{event.merchant}</p>
+                    <p className="text-base font-semibold text-slate-100">{event.merchant}</p>
                     <StatusBadge label={event.riskLevel} tone={riskTone(event.riskColor)} />
                   </div>
                   <p className="mt-1 text-sm text-slate-300">{formatDate(event.date)} · Status: {event.status}</p>
                 </div>
 
-                <p className="text-lg font-bold text-white">{formatCurrency(event.amount)}</p>
+                <p className="text-lg font-bold text-slate-100">{formatCurrency(event.amount)}</p>
               </div>
             ))}
 
             {!loading && events.length === 0 ? (
-              <p className="rounded-lg bg-slate-800 px-3 py-2 text-sm text-slate-300">No upcoming renewals found.</p>
+              <p className="rounded-lg bg-slate-900/70 px-3 py-2 text-sm text-slate-300">No upcoming renewals found.</p>
             ) : null}
           </div>
         </article>

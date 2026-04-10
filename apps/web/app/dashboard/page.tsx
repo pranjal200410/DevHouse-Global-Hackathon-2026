@@ -132,7 +132,7 @@ export default function DashboardPage() {
         }
       />
 
-      {error ? <p className="glass-card rounded-xl px-4 py-3 text-sm text-rose-700">{error}</p> : null}
+      {error ? <p className="glass-card rounded-xl px-4 py-3 text-sm text-rose-300">{error}</p> : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
@@ -165,7 +165,7 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Screen 6 - Dashboard</p>
-            <h2 className="mt-1 text-2xl font-bold text-white">Subscriptions Overview</h2>
+            <h2 className="mt-1 text-2xl font-bold text-slate-100">Subscriptions Overview</h2>
           </div>
           {riskBand ? <StatusBadge label={`Portfolio ${riskBand.label}`} tone={riskBand.tone} /> : null}
         </div>
@@ -179,7 +179,7 @@ export default function DashboardPage() {
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-semibold text-white">{subscription.merchant}</h3>
+                  <h3 className="text-lg font-semibold text-slate-100">{subscription.merchant}</h3>
                   <StatusBadge label={subscription.riskLevel} tone={getRiskTone(subscription.riskLevel)} />
                   <StatusBadge label={subscription.status} tone={getStatusTone(subscription.status)} />
                 </div>
@@ -201,7 +201,7 @@ export default function DashboardPage() {
         </div>
 
         {!loading && subscriptions.length === 0 ? (
-          <p className="mt-4 rounded-lg bg-slate-800 px-4 py-3 text-sm text-slate-300">No subscriptions found for this filter.</p>
+          <p className="mt-4 rounded-lg bg-slate-900/70 px-4 py-3 text-sm text-slate-300">No subscriptions found for this filter.</p>
         ) : null}
       </section>
     </main>

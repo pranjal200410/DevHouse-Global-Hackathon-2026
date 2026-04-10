@@ -103,6 +103,56 @@ const main = async (): Promise<void> => {
     const calendarBody = calendar.json() as Envelope<Array<{ date: string }>>;
     assert.ok(calendarBody.data.length >= 3, "expected at least 3 upcoming renewal events");
 
+    const cancellationCenter = await app.inject({
+      method: "GET",
+      url: "/v1/cancellations/center",
+      headers: authHeaders,
+    });
+    assert.equal(cancellationCenter.statusCode, 200, "cancellation center endpoint failed");
+    const cancellationCenterBody = cancellationCenter.json() as Envelope<Array<{ progressPercent: number }>>;
+    assert.ok(cancellationCenterBody.data.length >= 1, "expected cancellation center rows");
+    assert.ok(
+      cancellationCenterBody.data.every((row) => row.progressPercent >= 0 && row.progressPercent <= 100),
+      "invalid cancellation progress values",
+    );
+
+    const protectionControls = await app.inject({
+      method: "GET",
+      url: "/v1/protection-controls",
+      headers: authHeaders,
+    });
+    assert.equal(protectionControls.statusCode, 200, "protection controls endpoint failed");
+    const protectionBody = protectionControls.json() as Envelope<{
+      controls: Array<{ subscriptionId: string; autoBlockEnabled: boolean }>;
+    }>;
+    assert.ok(protectionBody.data.controls.length >= 1, "expected protection controls");
+
+    const controlTarget = protectionBody.data.controls[0];
+    assert.ok(controlTarget?.subscriptionId, "missing protection control target id");
+
+    const protectionUpdate = await app.inject({
+      method: "POST",
+      url: `/v1/protection-controls/${controlTarget.subscriptionId}`,
+      headers: authHeaders,
+      payload: {
+        enabled: !controlTarget.autoBlockEnabled,
+      },
+    });
+    assert.equal(protectionUpdate.statusCode, 200, "protection update endpoint failed");
+
+    const alertsFeed = await app.inject({
+      method: "GET",
+      url: "/v1/alerts/feed",
+      headers: authHeaders,
+    });
+    assert.equal(alertsFeed.statusCode, 200, "alerts feed endpoint failed");
+    const alertsBody = alertsFeed.json() as Envelope<Array<{ severity: string; occurredAt: string }>>;
+    assert.ok(alertsBody.data.length >= 1, "expected at least one alert");
+    assert.ok(
+      alertsBody.data.every((alert) => ["low", "medium", "high"].includes(alert.severity)),
+      "alerts feed returned invalid severity",
+    );
+
     console.log("API contract smoke checks passed.");
   } finally {
     await app.close();

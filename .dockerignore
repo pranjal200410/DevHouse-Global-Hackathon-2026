@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/*.log
+apps/web/test-results
+apps/web/playwright-report
+apps/web/blob-report
+playbook_layout.txt

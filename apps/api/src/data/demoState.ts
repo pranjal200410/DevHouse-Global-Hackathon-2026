@@ -1,10 +1,13 @@
 import { createHash } from "crypto";
 import { AppError } from "../lib/http";
 import type {
+  AlertFeedItem,
   BlockRule,
+  CancellationCenterItem,
   CancellationRecord,
   DashboardSummary,
   DisputeRecord,
+  ProtectionControlsPayload,
   RenewalCalendarItem,
   RenewalEvent,
   RiskLevel,
@@ -299,6 +302,59 @@ const getRiskBand = (highRiskCount: number): DashboardSummary["riskBand"] => {
     return "watch";
   }
   return "stable";
+};
+
+const cancellationProgress = (state: CancellationRecord["state"]): number => {
+  if (state === "completed") {
+    return 100;
+  }
+  if (state === "in-progress") {
+    return 66;
+  }
+  return 0;
+};
+
+const defaultCancellationSteps: Record<Subscription["cancelMethod"], string[]> = {
+  "in-app": [
+    "Open merchant billing settings",
+    "Select cancel plan",
+    "Save confirmation receipt",
+  ],
+  email: [
+    "Draft merchant cancellation request",
+    "Include account and billing details",
+    "Save merchant confirmation reply",
+  ],
+  phone: [
+    "Call merchant support",
+    "Request cancellation ticket number",
+    "Collect email or SMS confirmation",
+  ],
+  chat: [
+    "Open merchant live chat",
+    "Ask for immediate cancellation",
+    "Export transcript as evidence",
+  ],
+};
+
+const riskSortWeight = (riskLevel: RiskLevel): number => {
+  if (riskLevel === "high") {
+    return 0;
+  }
+  if (riskLevel === "medium") {
+    return 1;
+  }
+  return 2;
+};
+
+const cancellationStateWeight = (state: CancellationRecord["state"]): number => {
+  if (state === "in-progress") {
+    return 0;
+  }
+  if (state === "not-started") {
+    return 1;
+  }
+  return 2;
 };
 
 const getPotentialSavings = (subscriptions: Subscription[]): number =>
@@ -607,6 +663,221 @@ export const getRenewalCalendar = (userId: string): RenewalCalendarItem[] => {
     .sort((a, b) => byDateAsc(a.date, b.date));
 
   return structuredClone(activeRows);
+};
+
+export const getCancellationCenter = (userId: string): CancellationCenterItem[] => {
+  const state = getStateOrThrow(userId);
+  const cancellationBySubscription = new Map(
+    state.cancellations.map((record) => [record.subscriptionId, record]),
+  );
+
+  const items = state.subscriptions
+    .filter((subscription) => subscription.status !== "cancelled" || cancellationBySubscription.has(subscription.id))
+    .map((subscription) => {
+      const record = cancellationBySubscription.get(subscription.id);
+      const derivedState: CancellationRecord["state"] =
+        subscription.status === "cancelled"
+          ? "completed"
+          : subscription.status === "canceling"
+            ? "in-progress"
+            : "not-started";
+
+      const currentState = record?.state ?? derivedState;
+      const nextAction =
+        record?.nextAction ??
+        (currentState === "completed"
+          ? "Cancellation completed."
+          : currentState === "in-progress"
+            ? "Finish merchant confirmation and upload proof."
+            : "Start guided cancellation before the next renewal.");
+
+      return {
+        cancellationId: record?.id ?? `can_${subscription.id}`,
+        subscriptionId: subscription.id,
+        merchant: subscription.merchant,
+        amount: subscription.amount,
+        method: subscription.cancelMethod,
+        state: currentState,
+        requestedAt: record?.requestedAt ?? subscription.startedAt,
+        completedAt: record?.completedAt ?? (currentState === "completed" ? new Date().toISOString() : null),
+        nextAction,
+        progressPercent: cancellationProgress(currentState),
+        riskLevel: subscription.riskLevel,
+        steps: record?.steps ?? defaultCancellationSteps[subscription.cancelMethod],
+      } satisfies CancellationCenterItem;
+    })
+    .sort((a, b) => {
+      if (cancellationStateWeight(a.state) !== cancellationStateWeight(b.state)) {
+        return cancellationStateWeight(a.state) - cancellationStateWeight(b.state);
+      }
+      if (riskSortWeight(a.riskLevel) !== riskSortWeight(b.riskLevel)) {
+        return riskSortWeight(a.riskLevel) - riskSortWeight(b.riskLevel);
+      }
+      return byDateDesc(a.requestedAt, b.requestedAt);
+    });
+
+  return structuredClone(items);
+};
+
+export const getProtectionControls = (userId: string): ProtectionControlsPayload => {
+  const state = getStateOrThrow(userId);
+  const blockBySubscription = new Map(state.blocks.map((entry) => [entry.subscriptionId, entry]));
+
+  const controls = state.subscriptions
+    .filter((subscription) => subscription.status !== "cancelled")
+    .map((subscription) => {
+      const rule = blockBySubscription.get(subscription.id) ?? null;
+
+      return {
+        subscriptionId: subscription.id,
+        merchant: subscription.merchant,
+        amount: subscription.amount,
+        riskLevel: subscription.riskLevel,
+        status: subscription.status,
+        nextRenewalDate: subscription.nextRenewalDate,
+        autoBlockEnabled: rule?.enabled ?? false,
+        updatedAt: rule?.updatedAt ?? null,
+      } satisfies ProtectionControlsPayload["controls"][number];
+    })
+    .sort((a, b) => {
+      if (riskSortWeight(a.riskLevel) !== riskSortWeight(b.riskLevel)) {
+        return riskSortWeight(a.riskLevel) - riskSortWeight(b.riskLevel);
+      }
+
+      if (!a.nextRenewalDate && !b.nextRenewalDate) {
+        return a.merchant.localeCompare(b.merchant);
+      }
+      if (!a.nextRenewalDate) {
+        return 1;
+      }
+      if (!b.nextRenewalDate) {
+        return -1;
+      }
+      return byDateAsc(a.nextRenewalDate, b.nextRenewalDate);
+    });
+
+  const nextProtectedRenewal = controls
+    .filter((item) => item.autoBlockEnabled && Boolean(item.nextRenewalDate))
+    .map((item) => item.nextRenewalDate as string)
+    .sort(byDateAsc)[0] ?? null;
+
+  return {
+    summary: {
+      totalTracked: controls.length,
+      activeProtections: controls.filter((item) => item.autoBlockEnabled).length,
+      highRiskUnprotected: controls.filter((item) => item.riskLevel === "high" && !item.autoBlockEnabled).length,
+      nextProtectedRenewal,
+    },
+    controls: structuredClone(controls),
+  };
+};
+
+export const updateProtectionControl = (
+  userId: string,
+  subscriptionId: string,
+  enabled: boolean,
+): ProtectionControlsPayload => {
+  const state = getStateOrThrow(userId);
+  const subscription = findSubscriptionOrThrow(state, subscriptionId);
+
+  if (subscription.status === "cancelled") {
+    throw new AppError(
+      409,
+      "SUBSCRIPTION_CANCELLED",
+      "Cannot change protection on a cancelled subscription.",
+    );
+  }
+
+  setAutoBlock(userId, subscriptionId, enabled);
+  return getProtectionControls(userId);
+};
+
+export const getAlertsFeed = (userId: string): AlertFeedItem[] => {
+  const state = getStateOrThrow(userId);
+  const alerts: AlertFeedItem[] = [];
+  const blockBySubscription = new Map(state.blocks.map((entry) => [entry.subscriptionId, entry]));
+  const subscriptionById = new Map(state.subscriptions.map((subscription) => [subscription.id, subscription]));
+
+  for (const subscription of state.subscriptions) {
+    if (subscription.status === "cancelled" || !subscription.nextRenewalDate || subscription.riskLevel === "low") {
+      continue;
+    }
+
+    const blockRule = blockBySubscription.get(subscription.id);
+    const severity =
+      subscription.riskLevel === "high" && !blockRule?.enabled ? "high" : subscription.riskLevel;
+
+    alerts.push({
+      id: `alt_renewal_${subscription.id}`,
+      type: "renewal-risk",
+      severity,
+      title: `${subscription.merchant} renewal risk detected`,
+      message: `${subscription.merchant} may renew at $${subscription.amount.toFixed(2)} on ${new Date(subscription.nextRenewalDate).toLocaleDateString()}. Auto-block is ${blockRule?.enabled ? "active" : "inactive"}.`,
+      actionLabel: blockRule?.enabled ? "Review subscription" : "Enable auto-block",
+      actionHref: blockRule?.enabled ? `/subscriptions/${subscription.id}` : "/protection",
+      occurredAt: subscription.nextRenewalDate,
+      subscriptionId: subscription.id,
+      merchant: subscription.merchant,
+    });
+  }
+
+  for (const cancellation of state.cancellations.filter((entry) => entry.state === "in-progress")) {
+    const subscription = subscriptionById.get(cancellation.subscriptionId);
+    const severity = subscription?.riskLevel === "high" ? "high" : "medium";
+
+    alerts.push({
+      id: `alt_cancel_${cancellation.id}`,
+      type: "cancellation-followup",
+      severity,
+      title: `Cancellation follow-up: ${subscription?.merchant ?? "Subscription"}`,
+      message: cancellation.nextAction,
+      actionLabel: "Open cancellation center",
+      actionHref: "/cancellations",
+      occurredAt: cancellation.requestedAt,
+      subscriptionId: cancellation.subscriptionId,
+      merchant: subscription?.merchant,
+    });
+  }
+
+  for (const renewal of state.renewals.filter((entry) => entry.status === "blocked" || entry.status === "disputed")) {
+    const subscription = subscriptionById.get(renewal.subscriptionId);
+
+    alerts.push({
+      id: `alt_renewal_event_${renewal.id}`,
+      type: renewal.status === "blocked" ? "blocked-charge" : "dispute",
+      severity: renewal.status === "blocked" ? "medium" : "high",
+      title:
+        renewal.status === "blocked"
+          ? `Blocked charge prevented for ${subscription?.merchant ?? "subscription"}`
+          : `Disputed charge detected for ${subscription?.merchant ?? "subscription"}`,
+      message: `${renewal.note} Amount: $${renewal.amount.toFixed(2)}.`,
+      actionLabel: "View subscription detail",
+      actionHref: subscription ? `/subscriptions/${subscription.id}` : "/dashboard",
+      occurredAt: renewal.date,
+      subscriptionId: renewal.subscriptionId,
+      merchant: subscription?.merchant,
+    });
+  }
+
+  for (const dispute of state.disputes) {
+    const subscription = subscriptionById.get(dispute.subscriptionId);
+
+    alerts.push({
+      id: `alt_dispute_${dispute.id}`,
+      type: "dispute",
+      severity: dispute.status === "submitted" ? "high" : "medium",
+      title: `Dispute ${dispute.status}: ${subscription?.merchant ?? "subscription"}`,
+      message: `${dispute.reason} Amount in review: $${dispute.amount.toFixed(2)}.`,
+      actionLabel: "Check evidence",
+      actionHref: subscription ? `/subscriptions/${subscription.id}` : "/dashboard",
+      occurredAt: dispute.incidentDate,
+      subscriptionId: dispute.subscriptionId,
+      merchant: subscription?.merchant,
+    });
+  }
+
+  alerts.sort((a, b) => byDateDesc(a.occurredAt, b.occurredAt));
+  return structuredClone(alerts.slice(0, 30));
 };
 
 export const getDemoStateSnapshot = (userId: string): DemoState => structuredClone(getStateOrThrow(userId));
