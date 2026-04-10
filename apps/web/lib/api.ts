@@ -10,7 +10,8 @@ import type {
   SubscriptionDetail,
 } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+// Use same-origin proxy routes to avoid browser-to-container DNS/CORS issues.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
 interface ApiError {
   code: string;
