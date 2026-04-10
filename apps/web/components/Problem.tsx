@@ -1,6 +1,8 @@
+import { Card } from "./ui/Card";
+import { Section } from "./ui/Section";
 import { ShieldAlert, EyeOff, CreditCard, Clock } from "lucide-react";
 
-const painPoints = [
+const problemItems = [
   {
     title: "Hidden renewals",
     description: "Most subscriptions renew automatically without warning, creating surprise charges on your card.",
@@ -60,7 +62,7 @@ export default function Problem() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {painPoints.map(({ icon, title, description }) => (
+          {problemItems.map(({ icon, title, description }) => (
             <div
               key={title}
               className="rounded-xl p-5"
@@ -70,8 +72,8 @@ export default function Problem() {
               }}
             >
               <div className="text-xl mb-2">{icon}</div>
-              <div className="font-medium text-base mb-1" style={{ color: "rgba(223, 223, 22, 0.9)" }}>{title}</div>
-              <div className="text-sm leading-relaxed" style={{ color: "rgb(255, 255, 255)" }}>
+              <div className="font-medium text-base mb-1" style={{ color: "rgba(0,0,0,0.9)" }}>{title}</div>
+              <div className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.7)" }}>
                 {description}
               </div>
             </div>
