@@ -40,7 +40,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
     status: "active",
     riskLevel: "low",
     nextRenewalDate: "2026-04-08T10:00:00.000Z",
-    cancelMethod: "in-app",
+    cancelMethod: "automated",
     cancellationUrl: "https://www.netflix.com/cancelplan",
     startedAt: "2025-05-02T10:00:00.000Z",
   },
@@ -54,7 +54,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
     status: "active",
     riskLevel: "low",
     nextRenewalDate: "2026-04-12T10:00:00.000Z",
-    cancelMethod: "in-app",
+    cancelMethod: "automated",
     cancellationUrl: "https://www.spotify.com/account/subscription/",
     startedAt: "2024-11-22T10:00:00.000Z",
   },
@@ -68,7 +68,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
     status: "active",
     riskLevel: "low",
     nextRenewalDate: "2026-04-14T10:00:00.000Z",
-    cancelMethod: "in-app",
+    cancelMethod: "automated",
     cancellationUrl: "https://www.amazon.com/yourmembershipsandsubscriptions",
     startedAt: "2025-03-30T10:00:00.000Z",
   },
@@ -138,7 +138,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
     status: "active",
     riskLevel: "medium",
     nextRenewalDate: "2026-04-20T10:00:00.000Z",
-    cancelMethod: "in-app",
+    cancelMethod: "automated",
     cancellationUrl: "https://cloudai.example/cancel",
     startedAt: "2025-09-05T10:00:00.000Z",
   },
@@ -166,7 +166,7 @@ const DEMO_SUBSCRIPTIONS: Subscription[] = [
     status: "cancelled",
     riskLevel: "low",
     nextRenewalDate: null,
-    cancelMethod: "in-app",
+    cancelMethod: "automated",
     cancellationUrl: "https://foodbox.example/account",
     startedAt: "2025-01-12T10:00:00.000Z",
   },
@@ -315,6 +315,9 @@ const cancellationProgress = (state: CancellationRecord["state"]): number => {
 };
 
 const defaultCancellationSteps: Record<Subscription["cancelMethod"], string[]> = {
+  automated: [
+    "Subscription cancelled successfully",
+  ],
   "in-app": [
     "Open merchant billing settings",
     "Select cancel plan",
@@ -563,7 +566,9 @@ export const startCancellation = (userId: string, subscriptionId: string): Subsc
     return getSubscriptionDetail(userId, subscriptionId);
   }
 
-  subscription.status = "canceling";
+  // Automatically cancel if method is automated, otherwise mark as in-progress
+  const isAutomated = subscription.cancelMethod === "automated";
+  subscription.status = isAutomated ? "cancelled" : "canceling";
   if (subscription.riskLevel === "low") {
     subscription.riskLevel = "medium";
   }
@@ -574,21 +579,22 @@ export const startCancellation = (userId: string, subscriptionId: string): Subsc
       id: `can_${subscriptionId}`,
       userId: state.user.id,
       subscriptionId,
-      state: "in-progress",
+      state: isAutomated ? "completed" : "in-progress",
       requestedAt: new Date().toISOString(),
-      completedAt: null,
+      completedAt: isAutomated ? new Date().toISOString() : null,
       method: subscription.cancelMethod,
-      steps: [
+      steps: isAutomated ? ["Subscription cancelled via automated system."] : [
         "Open merchant cancellation flow",
         "Complete identity verification",
         "Capture confirmation receipt",
       ],
-      nextAction: "Upload confirmation receipt to lock protection.",
+      nextAction: isAutomated ? "Cancellation complete - no further action needed." : "Upload confirmation receipt to lock protection.",
     };
     state.cancellations.push(cancellation);
   } else if (cancellation.state !== "completed") {
-    cancellation.state = "in-progress";
-    cancellation.nextAction = "Complete final confirmation in merchant account.";
+    cancellation.state = isAutomated ? "completed" : "in-progress";
+    cancellation.completedAt = isAutomated ? new Date().toISOString() : null;
+    cancellation.nextAction = isAutomated ? "Cancellation complete - no further action needed." : "Complete final confirmation in merchant account.";
   }
 
   return getSubscriptionDetail(userId, subscriptionId);

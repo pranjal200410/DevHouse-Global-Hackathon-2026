@@ -192,9 +192,15 @@ export default function DashboardPage() {
                 <Link className="cta-secondary" href={`/subscriptions/${subscription.id}`}>
                   View Detail
                 </Link>
-                <a className="cta-primary" href={subscription.cancellationUrl} rel="noopener noreferrer" target="_blank">
-                  Open Cancel
-                </a>
+                {subscription.cancelMethod === "automated" || subscription.cancelMethod === "in-app" ? (
+                  <Link className="cta-primary" href={`/subscriptions/${subscription.id}#cancel`}>
+                    {subscription.cancelMethod === "automated" ? "Cancel Now" : "Start Cancellation"}
+                  </Link>
+                ) : (
+                  <a className="cta-primary" href={subscription.cancellationUrl} rel="noopener noreferrer" target="_blank">
+                    Open Cancel
+                  </a>
+                )}
               </div>
             </article>
           ))}

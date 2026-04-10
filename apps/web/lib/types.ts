@@ -35,7 +35,7 @@ export interface Subscription {
   status: SubscriptionStatus;
   riskLevel: RiskLevel;
   nextRenewalDate: string | null;
-  cancelMethod: "in-app" | "email" | "phone" | "chat";
+  cancelMethod: "automated" | "in-app" | "email" | "phone" | "chat";
   cancellationUrl: string;
 }
 

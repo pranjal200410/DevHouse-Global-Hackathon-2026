@@ -10,7 +10,8 @@ import type {
   SubscriptionDetail,
 } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+// Use same-origin proxy routes to avoid browser-to-container DNS/CORS issues.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
 
 interface ApiError {
   code: string;
@@ -118,12 +119,14 @@ export const startCancellation = async (token: string, subscriptionId: string): 
   request<SubscriptionDetail>(`/v1/subscriptions/${subscriptionId}/cancel`, {
     method: "POST",
     token,
+    body: JSON.stringify({}),
   });
 
 export const completeCancellation = async (token: string, subscriptionId: string): Promise<SubscriptionDetail> =>
   request<SubscriptionDetail>(`/v1/subscriptions/${subscriptionId}/cancel/complete`, {
     method: "POST",
     token,
+    body: JSON.stringify({}),
   });
 
 export const setAutoBlock = async (
