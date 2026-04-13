@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ShieldAlert, ShieldCheck, Wallet, CalendarDays } from "lucide-react";
 import { Button } from "./ui/Button";
-import { Badge } from "./ui/Badge";
 
 const heroHighlights = [
   { label: "Auto-risk scanning", icon: <ShieldAlert size={16} /> },

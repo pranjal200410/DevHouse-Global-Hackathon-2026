@@ -31,6 +31,7 @@ This app is designed for demo clarity: judges should understand the value quickl
 - /subscriptions/[id]   -> subscription-level operations and history
 - /cancellations        -> guided cancellation center (screen 10)
 - /protection           -> auto-block protection controls (screen 11)
+- /disputes             -> dispute studio and evidence readiness (screen 12)
 - /alerts               -> alerts and incident feed (screen 13)
 - /renewals             -> upcoming renewal timeline
 

@@ -98,6 +98,8 @@ Base URL: http://localhost:4000
 - Protection Controls (Screen 11)
 	- GET /v1/protection-controls
 	- POST /v1/protection-controls/:id
+- Dispute Studio (Screen 12)
+	- GET /v1/disputes/studio
 - Alerts Feed (Screen 13)
 	- GET /v1/alerts/feed
 
@@ -193,8 +195,9 @@ From root:
 4. Open one subscription detail.
 5. Open Cancellation Center and complete one pending flow.
 6. Open Protection Controls and toggle one Auto-Block setting.
-7. Open Alerts Feed and inspect one high-severity incident.
-8. Open Renewal Calendar.
+7. Open Dispute Studio and verify evidence readiness cards.
+8. Open Alerts Feed and inspect one high-severity incident.
+9. Open Renewal Calendar.
 
 This validates key business value in less than 2 minutes.
 

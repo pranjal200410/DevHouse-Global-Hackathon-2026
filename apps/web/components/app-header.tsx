@@ -30,6 +30,9 @@ export function AppHeader({ title, subtitle, rightSlot }: AppHeaderProps) {
         <Link className="nav-pill" href="/protection">
           Protection Controls
         </Link>
+        <Link className="nav-pill" href="/disputes">
+          Dispute Studio
+        </Link>
         <Link className="nav-pill" href="/alerts">
           Alerts Feed
         </Link>

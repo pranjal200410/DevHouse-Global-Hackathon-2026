@@ -3,6 +3,7 @@ import type {
   CancellationCenterItem,
   ApiEnvelope,
   DashboardSummary,
+  DisputeStudioPayload,
   ProtectionControlsPayload,
   RenewalCalendarItem,
   SessionResponse,
@@ -171,6 +172,12 @@ export const updateProtectionControl = async (
 
 export const getAlertsFeed = async (token: string): Promise<AlertFeedItem[]> =>
   request<AlertFeedItem[]>("/v1/alerts/feed", {
+    method: "GET",
+    token,
+  });
+
+export const getDisputeStudio = async (token: string): Promise<DisputeStudioPayload> =>
+  request<DisputeStudioPayload>("/v1/disputes/studio", {
     method: "GET",
     token,
   });

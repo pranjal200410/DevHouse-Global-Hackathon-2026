@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import {
   getAlertsFeed,
   getCancellationCenter,
+  getDisputeStudio,
   getProtectionControls,
   updateProtectionControl,
 } from "../data/demoState";
@@ -34,5 +35,10 @@ export const registerOperationsRoutes = (fastify: FastifyInstance): void => {
   fastify.get("/alerts/feed", async (request, reply) => {
     const auth = requireAuth(request);
     return reply.status(200).send(toSuccess(getAlertsFeed(auth.user.id)));
+  });
+
+  fastify.get("/disputes/studio", async (request, reply) => {
+    const auth = requireAuth(request);
+    return reply.status(200).send(toSuccess(getDisputeStudio(auth.user.id)));
   });
 };

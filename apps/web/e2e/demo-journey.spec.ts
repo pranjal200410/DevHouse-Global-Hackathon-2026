@@ -22,6 +22,10 @@ test("judge demo journey covers Vishwas screens", async ({ page }) => {
   await expect(page).toHaveURL(/\/protection$/);
   await expect(page.getByRole("heading", { name: /Auto-Block Matrix/i })).toBeVisible();
 
+  await page.getByRole("link", { name: /Dispute Studio/i }).first().click();
+  await expect(page).toHaveURL(/\/disputes$/);
+  await expect(page.getByRole("heading", { name: /Dispute Studio/i })).toBeVisible();
+
   await page.getByRole("link", { name: /Alerts Feed/i }).first().click();
   await expect(page).toHaveURL(/\/alerts$/);
   await expect(page.getByRole("heading", { name: /Incident Timeline/i })).toBeVisible();

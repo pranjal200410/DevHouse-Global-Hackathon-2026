@@ -96,14 +96,13 @@ model Block {
   id             String       @id @default(cuid())
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subscriptionId String
+  subscriptionId String       @unique
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
   enabled        Boolean      @default(false)
   updatedAt      DateTime     @updatedAt
   createdAt      DateTime     @default(now())
 
-  @@unique([userId, subscriptionId])
-  @@index([subscriptionId])
+  @@index([userId])
 }
 
 model Dispute {

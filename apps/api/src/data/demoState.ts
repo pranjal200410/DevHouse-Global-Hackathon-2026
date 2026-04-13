@@ -6,6 +6,7 @@ import type {
   CancellationCenterItem,
   CancellationRecord,
   DashboardSummary,
+  DisputeStudioPayload,
   DisputeRecord,
   ProtectionControlsPayload,
   RenewalCalendarItem,
@@ -358,6 +359,19 @@ const cancellationStateWeight = (state: CancellationRecord["state"]): number => 
     return 1;
   }
   return 2;
+};
+
+const disputeStatusWeight = (status: DisputeRecord["status"]): number => {
+  if (status === "submitted") {
+    return 0;
+  }
+  if (status === "draft") {
+    return 1;
+  }
+  if (status === "lost") {
+    return 2;
+  }
+  return 3;
 };
 
 const getPotentialSavings = (subscriptions: Subscription[]): number =>
@@ -796,6 +810,102 @@ export const updateProtectionControl = (
 
   setAutoBlock(userId, subscriptionId, enabled);
   return getProtectionControls(userId);
+};
+
+export const getDisputeStudio = (userId: string): DisputeStudioPayload => {
+  const state = getStateOrThrow(userId);
+  const subscriptionById = new Map(state.subscriptions.map((subscription) => [subscription.id, subscription]));
+  const cancellationBySubscription = new Map(state.cancellations.map((cancellation) => [cancellation.subscriptionId, cancellation]));
+  const blockBySubscription = new Map(state.blocks.map((block) => [block.subscriptionId, block]));
+
+  const disputes = state.disputes
+    .map((dispute) => {
+      const subscription = subscriptionById.get(dispute.subscriptionId);
+      if (!subscription) {
+        throw new AppError(500, "DISPUTE_SUBSCRIPTION_MISSING", "Dispute data is not linked to a subscription.");
+      }
+
+      const cancellation = cancellationBySubscription.get(dispute.subscriptionId) ?? null;
+      const hasRenewalEvidence = state.renewals.some(
+        (renewal) => renewal.subscriptionId === dispute.subscriptionId && (renewal.status === "disputed" || renewal.status === "charged"),
+      );
+      const hasBlockEvidence = Boolean(blockBySubscription.get(dispute.subscriptionId));
+      const hasCancellationTrail = Boolean(cancellation);
+
+      const checklist = [
+        {
+          label: "Dispute reason captured",
+          done: dispute.reason.trim().length > 0,
+        },
+        {
+          label: "Cancellation workflow evidence attached",
+          done: hasCancellationTrail,
+        },
+        {
+          label: "Renewal charge timeline captured",
+          done: hasRenewalEvidence,
+        },
+        {
+          label: "Protection settings history attached",
+          done: hasBlockEvidence,
+        },
+      ];
+
+      const completedChecklistItems = checklist.filter((item) => item.done).length;
+      const evidenceProgressPercent = Math.round((completedChecklistItems / checklist.length) * 100);
+
+      const recommendedAction =
+        dispute.status === "submitted"
+          ? evidenceProgressPercent === 100
+            ? "Monitor issuer timeline and respond to follow-up requests."
+            : "Attach remaining evidence before issuer review window closes."
+          : dispute.status === "draft"
+            ? "Submit dispute after final evidence review."
+            : dispute.status === "won"
+              ? "Archive the winning decision and confirmation trail."
+              : "Review lost outcome and decide whether to escalate with additional proof.";
+
+      return {
+        disputeId: dispute.id,
+        subscriptionId: dispute.subscriptionId,
+        merchant: subscription.merchant,
+        incidentDate: dispute.incidentDate,
+        amount: dispute.amount,
+        reason: dispute.reason,
+        status: dispute.status,
+        riskLevel: subscription.riskLevel,
+        cancellationState: cancellation?.state ?? null,
+        evidenceProgressPercent,
+        recommendedAction,
+        checklist,
+      };
+    })
+    .sort((a, b) => {
+      if (disputeStatusWeight(a.status) !== disputeStatusWeight(b.status)) {
+        return disputeStatusWeight(a.status) - disputeStatusWeight(b.status);
+      }
+
+      if (riskSortWeight(a.riskLevel) !== riskSortWeight(b.riskLevel)) {
+        return riskSortWeight(a.riskLevel) - riskSortWeight(b.riskLevel);
+      }
+
+      return byDateDesc(a.incidentDate, b.incidentDate);
+    });
+
+  const openDisputes = disputes.filter((dispute) => dispute.status === "draft" || dispute.status === "submitted").length;
+  const highPriorityDisputes = disputes.filter(
+    (dispute) => dispute.riskLevel === "high" && (dispute.status === "draft" || dispute.status === "submitted"),
+  ).length;
+
+  return {
+    summary: {
+      openDisputes,
+      totalDisputedAmount: Number(disputes.reduce((sum, dispute) => sum + dispute.amount, 0).toFixed(2)),
+      highPriorityDisputes,
+      evidenceReadyDisputes: disputes.filter((dispute) => dispute.evidenceProgressPercent === 100).length,
+    },
+    disputes: structuredClone(disputes),
+  };
 };
 
 export const getAlertsFeed = (userId: string): AlertFeedItem[] => {

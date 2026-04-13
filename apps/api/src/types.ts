@@ -158,3 +158,33 @@ export interface AlertFeedItem {
   subscriptionId?: string;
   merchant?: string;
 }
+
+export interface DisputeStudioChecklistItem {
+  label: string;
+  done: boolean;
+}
+
+export interface DisputeStudioItem {
+  disputeId: string;
+  subscriptionId: string;
+  merchant: string;
+  incidentDate: string;
+  amount: number;
+  reason: string;
+  status: DisputeStatus;
+  riskLevel: RiskLevel;
+  cancellationState: CancellationState | null;
+  evidenceProgressPercent: number;
+  recommendedAction: string;
+  checklist: DisputeStudioChecklistItem[];
+}
+
+export interface DisputeStudioPayload {
+  summary: {
+    openDisputes: number;
+    totalDisputedAmount: number;
+    highPriorityDisputes: number;
+    evidenceReadyDisputes: number;
+  };
+  disputes: DisputeStudioItem[];
+}

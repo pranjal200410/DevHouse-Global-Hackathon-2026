@@ -140,6 +140,26 @@ const main = async (): Promise<void> => {
     });
     assert.equal(protectionUpdate.statusCode, 200, "protection update endpoint failed");
 
+    const disputeStudio = await app.inject({
+      method: "GET",
+      url: "/v1/disputes/studio",
+      headers: authHeaders,
+    });
+    assert.equal(disputeStudio.statusCode, 200, "dispute studio endpoint failed");
+    const disputeStudioBody = disputeStudio.json() as Envelope<{
+      summary: {
+        openDisputes: number;
+      };
+      disputes: Array<{ evidenceProgressPercent: number }>;
+    }>;
+    assert.ok(Array.isArray(disputeStudioBody.data.disputes), "dispute studio disputes shape mismatch");
+    assert.ok(
+      disputeStudioBody.data.disputes.every(
+        (dispute) => dispute.evidenceProgressPercent >= 0 && dispute.evidenceProgressPercent <= 100,
+      ),
+      "dispute studio evidence progress values are invalid",
+    );
+
     const alertsFeed = await app.inject({
       method: "GET",
       url: "/v1/alerts/feed",

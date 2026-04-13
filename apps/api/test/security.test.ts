@@ -128,19 +128,19 @@ test("sessions are isolated across demo users", async () => {
 
     const cancelForA = await app.inject({
       method: "POST",
-      url: "/v1/subscriptions/sub_netflix/cancel",
+      url: "/v1/subscriptions/sub_adobe/cancel",
       headers: { authorization: `Bearer ${tokenA}` },
     });
     assert.equal(cancelForA.statusCode, 200);
 
     const detailA = await app.inject({
       method: "GET",
-      url: "/v1/subscriptions/sub_netflix",
+      url: "/v1/subscriptions/sub_adobe",
       headers: { authorization: `Bearer ${tokenA}` },
     });
     const detailB = await app.inject({
       method: "GET",
-      url: "/v1/subscriptions/sub_netflix",
+      url: "/v1/subscriptions/sub_adobe",
       headers: { authorization: `Bearer ${tokenB}` },
     });
 
@@ -152,6 +152,78 @@ test("sessions are isolated across demo users", async () => {
 
     assert.equal(detailABody.data.subscription.status, "canceling");
     assert.equal(detailBBody.data.subscription.status, "active");
+  } finally {
+    await app.close();
+  }
+});
+
+test("protected endpoints reject missing authorization token", async () => {
+  const app = buildServer();
+
+  try {
+    const checks = await Promise.all([
+      app.inject({ method: "GET", url: "/v1/auth/session" }),
+      app.inject({ method: "POST", url: "/v1/auth/logout" }),
+      app.inject({ method: "GET", url: "/v1/dashboard/summary" }),
+      app.inject({ method: "GET", url: "/v1/subscriptions" }),
+      app.inject({ method: "GET", url: "/v1/subscriptions/sub_netflix" }),
+      app.inject({ method: "POST", url: "/v1/subscriptions/sub_netflix/cancel" }),
+      app.inject({ method: "POST", url: "/v1/subscriptions/sub_netflix/cancel/complete" }),
+      app.inject({
+        method: "POST",
+        url: "/v1/subscriptions/sub_netflix/block",
+        payload: { enabled: true },
+      }),
+      app.inject({ method: "GET", url: "/v1/renewals/calendar" }),
+      app.inject({ method: "GET", url: "/v1/cancellations/center" }),
+      app.inject({ method: "GET", url: "/v1/protection-controls" }),
+      app.inject({
+        method: "POST",
+        url: "/v1/protection-controls/sub_netflix",
+        payload: { enabled: true },
+      }),
+      app.inject({ method: "GET", url: "/v1/disputes/studio" }),
+      app.inject({ method: "GET", url: "/v1/alerts/feed" }),
+    ]);
+
+    for (const response of checks) {
+      assert.equal(response.statusCode, 401);
+    }
+  } finally {
+    await app.close();
+  }
+});
+
+test("invalid subscription id returns 404 across detail and mutation endpoints", async () => {
+  const app = buildServer();
+
+  try {
+    const token = await login(app, uniqueEmail("invalid-sub"));
+    const headers = { authorization: `Bearer ${token}` };
+
+    const unknownId = "sub_does_not_exist";
+
+    const responses = await Promise.all([
+      app.inject({ method: "GET", url: `/v1/subscriptions/${unknownId}`, headers }),
+      app.inject({ method: "POST", url: `/v1/subscriptions/${unknownId}/cancel`, headers }),
+      app.inject({ method: "POST", url: `/v1/subscriptions/${unknownId}/cancel/complete`, headers }),
+      app.inject({
+        method: "POST",
+        url: `/v1/subscriptions/${unknownId}/block`,
+        headers,
+        payload: { enabled: true },
+      }),
+      app.inject({
+        method: "POST",
+        url: `/v1/protection-controls/${unknownId}`,
+        headers,
+        payload: { enabled: true },
+      }),
+    ]);
+
+    for (const response of responses) {
+      assert.equal(response.statusCode, 404);
+    }
   } finally {
     await app.close();
   }

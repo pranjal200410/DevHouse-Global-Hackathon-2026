@@ -215,6 +215,36 @@ Request body:
 
 Updates Auto-Block for the selected subscription and returns refreshed protection payload.
 
+## Screen 12: Dispute Studio
+
+### GET `/v1/disputes/studio`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns:
+
+- `summary`
+  - `openDisputes`
+  - `totalDisputedAmount`
+  - `highPriorityDisputes`
+  - `evidenceReadyDisputes`
+- `disputes[]`
+
+Each dispute row contains:
+
+- `disputeId`
+- `subscriptionId`
+- `merchant`
+- `incidentDate`
+- `amount`
+- `reason`
+- `status` (`draft|submitted|won|lost`)
+- `riskLevel` (`low|medium|high`)
+- `cancellationState` (`not-started|in-progress|completed|null`)
+- `evidenceProgressPercent`
+- `recommendedAction`
+- `checklist[]`
+
 ## Screen 13: Alerts & Incident Feed
 
 ### GET `/v1/alerts/feed`

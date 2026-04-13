@@ -12,9 +12,18 @@ interface SessionStore {
   clearSession: () => void;
 }
 
+const isSessionExpired = (expiresAt: string | null): boolean => {
+  if (!expiresAt) {
+    return true;
+  }
+
+  const expiry = Date.parse(expiresAt);
+  return Number.isNaN(expiry) || expiry <= Date.now();
+};
+
 const storage = createJSONStorage<SessionStore>(() => {
   if (typeof window !== "undefined") {
-    return window.localStorage;
+    return window.sessionStorage;
   }
 
   return {
@@ -30,12 +39,28 @@ export const useSessionStore = create<SessionStore>()(
       token: null,
       expiresAt: null,
       user: null,
-      setSession: ({ token, expiresAt, user }) => set({ token, expiresAt, user }),
+      setSession: ({ token, expiresAt, user }) => {
+        if (isSessionExpired(expiresAt)) {
+          set({ token: null, expiresAt: null, user: null });
+          return;
+        }
+
+        set({ token, expiresAt, user });
+      },
       clearSession: () => set({ token: null, expiresAt: null, user: null }),
     }),
     {
       name: "scg-session",
       storage,
+      onRehydrateStorage: () => (state) => {
+        if (!state) {
+          return;
+        }
+
+        if (isSessionExpired(state.expiresAt)) {
+          state.clearSession();
+        }
+      },
     },
   ),
 );

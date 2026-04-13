@@ -1,5 +1,3 @@
-import { Card } from "./ui/Card";
-import { Section } from "./ui/Section";
 import { ShieldAlert, EyeOff, CreditCard, Clock } from "lucide-react";
 
 const problemItems = [
