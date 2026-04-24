@@ -10,11 +10,11 @@ import {
   startCancellation,
 } from "@/lib/api";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
-import { useSessionStore } from "@/lib/session-store";
+import { useSessionHydrated, useSessionStore } from "@/lib/session-store";
 import type { SubscriptionDetail } from "@/lib/types";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const getToneByRisk = (risk: "low" | "medium" | "high"): "emerald" | "amber" | "rose" => {
@@ -30,7 +30,9 @@ const getToneByRisk = (risk: "low" | "medium" | "high"): "emerald" | "amber" | "
 export default function SubscriptionDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
 
+  const isSessionHydrated = useSessionHydrated();
   const token = useSessionStore((state) => state.token);
   const clearSession = useSessionStore((state) => state.clearSession);
 
@@ -40,6 +42,9 @@ export default function SubscriptionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<"cancel" | "complete" | "block" | null>(null);
+
+  const intentParam = searchParams.get("intent");
+  const planIntent = intentParam === "cancel" || intentParam === "switch" || intentParam === "downgrade" ? intentParam : null;
 
   const loadDetail = useCallback(async () => {
     if (!token) {
@@ -66,12 +71,16 @@ export default function SubscriptionDetailPage() {
   }, [token, subscriptionId, clearSession, router]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (!token) {
       router.replace("/auth");
       return;
     }
     void loadDetail();
-  }, [token, loadDetail, router]);
+  }, [isSessionHydrated, token, loadDetail, router]);
 
   const runAction = async (
     action: "cancel" | "complete" | "block",
@@ -99,7 +108,7 @@ export default function SubscriptionDetailPage() {
     }
   };
 
-  if (!token) {
+  if (!isSessionHydrated || !token) {
     return null;
   }
 
@@ -109,7 +118,7 @@ export default function SubscriptionDetailPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
       <AppHeader
         title={detail?.subscription.merchant ?? "Subscription Detail"}
-        subtitle="Review full billing history, cancellation lifecycle, and risk controls for this subscription."
+        subtitle="View full billing history, plan disputes, and capture proof of actions taken for evidence."
         rightSlot={
           <>
             <Link className="cta-secondary" href="/dashboard">
@@ -154,6 +163,7 @@ export default function SubscriptionDetailPage() {
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <button
+                  id="cancel-actions"
                   className="cta-secondary"
                   disabled={actionLoading !== null || !detail.actions.canCancel}
                   onClick={() =>
@@ -161,7 +171,7 @@ export default function SubscriptionDetailPage() {
                   }
                   type="button"
                 >
-                  {actionLoading === "cancel" ? "Starting..." : "Start Cancellation"}
+                  {actionLoading === "cancel" ? "Starting..." : "Guide: Start Cancellation"}
                 </button>
 
                 <button
@@ -172,7 +182,7 @@ export default function SubscriptionDetailPage() {
                   }
                   type="button"
                 >
-                  {actionLoading === "complete" ? "Completing..." : "Mark as Completed"}
+                  {actionLoading === "complete" ? "Saving proof..." : "Log: Cancellation Completed"}
                 </button>
 
                 <button
@@ -186,10 +196,37 @@ export default function SubscriptionDetailPage() {
                   {actionLoading === "block"
                     ? "Saving..."
                     : blockEnabled
-                      ? "Disable Auto-block"
-                      : "Enable Auto-block"}
+                      ? "Disable Tracking"
+                      : "Enable Tracking"}
                 </button>
               </div>
+
+              {planIntent ? (
+                <div id="plan-action" className="surface-muted mt-5 p-4">
+                  <p className="text-sm font-semibold text-slate-100">Guided Action</p>
+                  <p className="mt-1 text-sm text-slate-300">
+                    {planIntent === "switch"
+                      ? "To reduce this charge: Open the provider's billing portal (link below), select a lower-cost plan or equivalent service, and confirm the change. Return here to log proof of the action."
+                      : planIntent === "downgrade"
+                        ? "To reduce this charge: Open the provider's billing portal (link below), downgrade to a lower tier, and confirm. Return here to document the change as proof you took action."
+                        : "To stop this charge: Click 'Start Cancellation' below to initiate. Follow the provider's cancellation process, then click 'Mark as Completed' once you have confirmation. We'll capture proof of cancellation for your records."}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {planIntent === "cancel" ? (
+                      <a className="cta-secondary" href="#cancel-actions">
+                        View Cancellation Steps
+                      </a>
+                    ) : (
+                      <a className="cta-primary" href={detail.subscription.cancellationUrl} rel="noopener noreferrer" target="_blank">
+                        Open Provider Portal
+                      </a>
+                    )}
+                    <Link className="cta-secondary" href="/disputes">
+                      Go to Evidence Capture
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
 
               {detail.cancellation ? (
                 <div className="surface-muted mt-5 p-4">

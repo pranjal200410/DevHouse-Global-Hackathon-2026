@@ -6,6 +6,15 @@ export type CancellationState = "not-started" | "in-progress" | "completed";
 export type DisputeStatus = "draft" | "submitted" | "won" | "lost";
 export type AlertSeverity = "low" | "medium" | "high";
 export type AlertType = "renewal-risk" | "blocked-charge" | "dispute" | "cancellation-followup";
+export type IntegrationEventType =
+  | "inbox-sync"
+  | "subscription-detected"
+  | "cancellation-outreach"
+  | "auto-block-update"
+  | "dispute-draft-generated"
+  | "error";
+
+export type IntegrationEventStatus = "success" | "failure" | "info";
 
 export interface User {
   id: string;
@@ -86,6 +95,21 @@ export interface DashboardSummary {
   riskBand: "stable" | "watch" | "critical";
   nextRenewalDate: string | null;
   potentialSavings: number;
+}
+
+export interface SavingsOpportunity {
+  subscriptionId: string;
+  merchant: string;
+  amount: number;
+  currentAnnualCost: number;
+  projectedAnnualCost: number;
+  monthlySavings: number;
+  annualSavings: number;
+  confidenceScore: number;
+  action: "cancel" | "downgrade" | "switch";
+  reason: string;
+  recommendedPlan: string;
+  urgency: "now" | "this-week" | "this-month";
 }
 
 export interface RenewalCalendarItem {
@@ -187,4 +211,53 @@ export interface DisputeStudioPayload {
     evidenceReadyDisputes: number;
   };
   disputes: DisputeStudioItem[];
+}
+
+export interface DetectedSubscriptionCandidate {
+  merchant: string;
+  amount: number;
+  detectedAt: string;
+  sourceMessageId: string;
+  sourceSubject: string;
+  sourceFrom: string;
+  cancellationEmail: string | null;
+}
+
+export interface InboxDetection {
+  merchant: string;
+  amount: number;
+  detectedAt: string;
+  sourceMessageId: string;
+  sourceSubject: string;
+  sourceFrom: string;
+  cancellationEmail: string | null;
+}
+
+export interface InboxSyncResult {
+  source: "imap" | "seed-file";
+  startedAt: string;
+  finishedAt: string;
+  processedMessages: number;
+  importedCount: number;
+  detections: InboxDetection[];
+  errors: string[];
+}
+
+export interface CancellationOutreachResult {
+  attemptedAt: string;
+  status: "sent" | "failed" | "skipped";
+  recipient: string;
+  messageId: string | null;
+  previewUrl: string | null;
+  error: string | null;
+}
+
+export interface ProofLogEvent {
+  id: string;
+  timestamp: string;
+  type: IntegrationEventType;
+  status: IntegrationEventStatus;
+  subscriptionId: string | null;
+  merchant: string | null;
+  details: Record<string, unknown>;
 }

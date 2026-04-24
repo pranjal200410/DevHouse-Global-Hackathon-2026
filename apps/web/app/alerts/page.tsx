@@ -5,7 +5,7 @@ import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import { ClientError, getAlertsFeed } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { useSessionStore } from "@/lib/session-store";
+import { useSessionHydrated, useSessionStore } from "@/lib/session-store";
 import type { AlertFeedItem } from "@/lib/types";
 import { AlertTriangle, BellRing, ShieldAlert, Siren } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +31,7 @@ const typeLabel: Record<AlertFeedItem["type"], string> = {
 
 export default function AlertsFeedPage() {
   const router = useRouter();
+  const isSessionHydrated = useSessionHydrated();
   const token = useSessionStore((state) => state.token);
   const clearSession = useSessionStore((state) => state.clearSession);
 
@@ -62,12 +63,16 @@ export default function AlertsFeedPage() {
   }, [token, clearSession, router]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (!token) {
       router.replace("/auth");
       return;
     }
     void loadAlerts();
-  }, [token, loadAlerts, router]);
+  }, [isSessionHydrated, token, loadAlerts, router]);
 
   const counts = useMemo(
     () => ({
@@ -78,7 +83,7 @@ export default function AlertsFeedPage() {
     [alerts],
   );
 
-  if (!token) {
+  if (!isSessionHydrated || !token) {
     return null;
   }
 

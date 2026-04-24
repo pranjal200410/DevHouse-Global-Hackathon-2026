@@ -5,13 +5,16 @@ import type {
   BlockRule,
   CancellationCenterItem,
   CancellationRecord,
+  DetectedSubscriptionCandidate,
   DashboardSummary,
   DisputeStudioPayload,
   DisputeRecord,
+  ProofLogEvent,
   ProtectionControlsPayload,
   RenewalCalendarItem,
   RenewalEvent,
   RiskLevel,
+  SavingsOpportunity,
   Subscription,
   SubscriptionDetail,
   SubscriptionStatus,
@@ -25,6 +28,7 @@ interface DemoState {
   cancellations: CancellationRecord[];
   blocks: BlockRule[];
   disputes: DisputeRecord[];
+  proofEvents: ProofLogEvent[];
 }
 
 const TEMPLATE_USER_ID = "user_template_001";
@@ -284,6 +288,9 @@ const userStates = new Map<string, DemoState>();
 
 const byDateAsc = (a: string, b: string): number => Date.parse(a) - Date.parse(b);
 const byDateDesc = (a: string, b: string): number => Date.parse(b) - Date.parse(a);
+const normalizeMerchant = (value: string): string => value.trim().toLowerCase();
+const createProofEventId = (): string =>
+  `evt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
 const riskToColor = (riskLevel: RiskLevel): RenewalCalendarItem["riskColor"] => {
   if (riskLevel === "high") {
@@ -382,6 +389,91 @@ const getPotentialSavings = (subscriptions: Subscription[]): number =>
       .toFixed(2),
   );
 
+const cycleMultiplier = (billingCycle: Subscription["billingCycle"]): number =>
+  billingCycle === "yearly" ? 1 / 12 : 1;
+
+const toAnnualCost = (subscription: Subscription): number =>
+  Number((subscription.amount * cycleMultiplier(subscription.billingCycle) * 12).toFixed(2));
+
+const getSavingsRecommendation = (
+  subscription: Subscription,
+): {
+  projectedAnnualCost: number;
+  action: SavingsOpportunity["action"];
+  reason: string;
+  recommendedPlan: string;
+  confidenceScore: number;
+  urgency: SavingsOpportunity["urgency"];
+} => {
+  if (subscription.riskLevel === "high") {
+    return {
+      projectedAnnualCost: 0,
+      action: "cancel",
+      reason: "High-risk subscription with weak retention value and elevated billing risk.",
+      recommendedPlan: "Cancel and re-activate only when needed",
+      confidenceScore: 92,
+      urgency: "now",
+    };
+  }
+
+  if (subscription.amount >= 15) {
+    return {
+      projectedAnnualCost: Number((toAnnualCost(subscription) * 0.72).toFixed(2)),
+      action: "switch",
+      reason: "Equivalent alternatives can reduce spend while keeping core functionality.",
+      recommendedPlan: "Switch to a lower-cost competitor or annual promo plan",
+      confidenceScore: 78,
+      urgency: "this-week",
+    };
+  }
+
+  return {
+    projectedAnnualCost: Number((toAnnualCost(subscription) * 0.8).toFixed(2)),
+    action: "downgrade",
+    reason: "Current tier appears over-provisioned relative to typical usage patterns.",
+    recommendedPlan: "Move to basic tier",
+    confidenceScore: 71,
+    urgency: "this-month",
+  };
+};
+
+export const getSavingsOpportunities = (userId: string): SavingsOpportunity[] => {
+  const state = getStateOrThrow(userId);
+
+  const opportunities = state.subscriptions
+    .filter((subscription) => subscription.status !== "cancelled")
+    .map((subscription) => {
+      const currentAnnualCost = toAnnualCost(subscription);
+      const recommendation = getSavingsRecommendation(subscription);
+      const annualSavings = Number(Math.max(0, currentAnnualCost - recommendation.projectedAnnualCost).toFixed(2));
+      const monthlySavings = Number((annualSavings / 12).toFixed(2));
+
+      return {
+        subscriptionId: subscription.id,
+        merchant: subscription.merchant,
+        amount: subscription.amount,
+        currentAnnualCost,
+        projectedAnnualCost: recommendation.projectedAnnualCost,
+        monthlySavings,
+        annualSavings,
+        confidenceScore: recommendation.confidenceScore,
+        action: recommendation.action,
+        reason: recommendation.reason,
+        recommendedPlan: recommendation.recommendedPlan,
+        urgency: recommendation.urgency,
+      } satisfies SavingsOpportunity;
+    })
+    .filter((item) => item.annualSavings > 0)
+    .sort((a, b) => {
+      if (b.annualSavings !== a.annualSavings) {
+        return b.annualSavings - a.annualSavings;
+      }
+      return b.confidenceScore - a.confidenceScore;
+    });
+
+  return structuredClone(opportunities.slice(0, 5));
+};
+
 const normalizeEmail = (email: string): string => email.trim().toLowerCase();
 
 const nameFromEmail = (email: string): string => {
@@ -420,6 +512,7 @@ const createInitialState = (user: User): DemoState => ({
     ...item,
     userId: user.id,
   })),
+  proofEvents: [],
 });
 
 const getStateOrThrow = (userId: string): DemoState => {
@@ -476,6 +569,31 @@ export const resetAllDemoStates = (): void => {
 export const resetDemoStateForUser = (userId: string): void => {
   const currentState = getStateOrThrow(userId);
   userStates.set(userId, createInitialState(currentState.user));
+};
+
+export const appendProofEvent = (
+  userId: string,
+  event: Omit<ProofLogEvent, "id" | "timestamp">,
+): ProofLogEvent => {
+  const state = getStateOrThrow(userId);
+  const created: ProofLogEvent = {
+    id: createProofEventId(),
+    timestamp: new Date().toISOString(),
+    ...event,
+  };
+  state.proofEvents.push(created);
+  return structuredClone(created);
+};
+
+export const getProofEvents = (userId: string, limit = 100): ProofLogEvent[] => {
+  const state = getStateOrThrow(userId);
+  const safeLimit = Math.min(Math.max(limit, 1), 500);
+
+  return structuredClone(
+    [...state.proofEvents]
+      .sort((a, b) => byDateDesc(a.timestamp, b.timestamp))
+      .slice(0, safeLimit),
+  );
 };
 
 export const getDemoUser = (userId: string): User => structuredClone(getStateOrThrow(userId).user);
@@ -665,6 +783,58 @@ export const setAutoBlock = (userId: string, subscriptionId: string, enabled: bo
   }
 
   return getSubscriptionDetail(userId, subscriptionId);
+};
+
+export const upsertDetectedSubscriptions = (
+  userId: string,
+  candidates: DetectedSubscriptionCandidate[],
+): { importedCount: number; subscriptions: Subscription[] } => {
+  const state = getStateOrThrow(userId);
+  const imported: Subscription[] = [];
+
+  for (const candidate of candidates) {
+    const merchantKey = normalizeMerchant(candidate.merchant);
+    const existing = state.subscriptions.find(
+      (subscription) => normalizeMerchant(subscription.merchant) === merchantKey,
+    );
+
+    if (existing) {
+      existing.amount = candidate.amount;
+      existing.nextRenewalDate = candidate.detectedAt;
+      if (existing.status === "cancelled") {
+        existing.status = "active";
+      }
+      imported.push(existing);
+      continue;
+    }
+
+    const digest = createHash("sha256")
+      .update(`${state.user.id}:${candidate.merchant}:${candidate.sourceMessageId}`)
+      .digest("hex")
+      .slice(0, 10);
+
+    const inserted: Subscription = {
+      id: `sub_inbox_${digest}`,
+      userId: state.user.id,
+      merchant: candidate.merchant,
+      category: "Inbox",
+      amount: candidate.amount,
+      billingCycle: "monthly",
+      status: "active",
+      riskLevel: "medium",
+      nextRenewalDate: candidate.detectedAt,
+      cancelMethod: "email",
+      cancellationUrl: `mailto:${candidate.cancellationEmail ?? "support@unknown-merchant.example"}`,
+      startedAt: candidate.detectedAt,
+    };
+    state.subscriptions.push(inserted);
+    imported.push(inserted);
+  }
+
+  return {
+    importedCount: imported.length,
+    subscriptions: structuredClone(imported),
+  };
 };
 
 export const getRenewalCalendar = (userId: string): RenewalCalendarItem[] => {

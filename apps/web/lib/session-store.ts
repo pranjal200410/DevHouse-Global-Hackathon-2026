@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { User } from "./types";
@@ -64,3 +65,24 @@ export const useSessionStore = create<SessionStore>()(
     },
   ),
 );
+
+export const useSessionHydrated = (): boolean => {
+  const [hydrated, setHydrated] = useState(useSessionStore.persist.hasHydrated());
+
+  useEffect(() => {
+    const unsubscribeHydrate = useSessionStore.persist.onHydrate(() => {
+      setHydrated(false);
+    });
+
+    const unsubscribeFinish = useSessionStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+
+    return () => {
+      unsubscribeHydrate();
+      unsubscribeFinish();
+    };
+  }, []);
+
+  return hydrated;
+};

@@ -102,6 +102,25 @@ Response includes:
 - `nextRenewalDate`
 - `potentialSavings`
 
+### GET `/v1/dashboard/savings-opportunities`
+
+Headers: `Authorization: Bearer <token>`
+
+Returns prioritized recommendation rows with:
+
+- `subscriptionId`
+- `merchant`
+- `amount`
+- `currentAnnualCost`
+- `projectedAnnualCost`
+- `monthlySavings`
+- `annualSavings`
+- `confidenceScore`
+- `action` (`cancel` | `downgrade` | `switch`)
+- `reason`
+- `recommendedPlan`
+- `urgency` (`now` | `this-week` | `this-month`)
+
 ## Subscriptions
 
 ### GET `/v1/subscriptions`

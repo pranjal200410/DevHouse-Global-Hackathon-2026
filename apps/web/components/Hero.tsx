@@ -3,9 +3,9 @@ import { ArrowRight, ShieldAlert, ShieldCheck, Wallet, CalendarDays } from "luci
 import { Button } from "./ui/Button";
 
 const heroHighlights = [
-  { label: "Auto-risk scanning", icon: <ShieldAlert size={16} /> },
-  { label: "Renewal prediction", icon: <CalendarDays size={16} /> },
-  { label: "Proof-ready reports", icon: <ShieldCheck size={16} /> },
+  { label: "Detect hidden subscriptions", icon: <ShieldAlert size={16} /> },
+  { label: "Predict charges before renewal", icon: <CalendarDays size={16} /> },
+  { label: "Capture dispute-winning proof", icon: <ShieldCheck size={16} /> },
 ];
 
 export function Hero() {
@@ -15,27 +15,24 @@ export function Hero() {
       <div className="pointer-events-none absolute right-0 top-0 hidden h-96 w-96 rounded-full bg-amber-400/5 blur-3xl lg:block" />
       <div className="relative grid gap-12 lg:grid-cols-[1.3fr_0.9fr] lg:items-end">
         <div className="max-w-2xl">
-         
-           <h1
+          <h1
         className="font-display font-extrabold leading-none tracking-tight mb-5 md:mb-6 animate-fade-up"
         style={{ fontSize: "clamp(2rem, 6vw, 3.8rem)", letterSpacing: "-0.03em" }}
       >
-        Stop losing money to{" "}
+        Find hidden subscriptions,{" "}
         <br className="hidden sm:block" />
-        <span style={{ color: "var(--emerald-light)" }}>forgotten</span>{" "}subscriptions
+        <span style={{ color: "var(--emerald-light)" }}>win dispute refunds</span>,{" "}
         <br className="hidden sm:block" />
-        and <span style={{ color: "var(--amber)" }}>dark patterns.</span>
+        and block future{" "}
+        <span style={{ color: "var(--amber)" }}>unauthorized charges.</span>
       </h1>
           <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
-            SubGuard detects hidden renewals,predicts charges before they hit,and generates dispute-ready proof in seconds-no login needed to see it work.
+            SubGuard auto-detects subscription charges from your email, captures dispute-ready proof, and helps you recover money from unwanted renewals—even before they hit your account.
           </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
             <Button as={Link} href="/auth" variant="primary">
               Try Demo
               <ArrowRight size={16} />
-            </Button>
-            <Button as={Link} href="/auth" variant="secondary">
-              Explore live dashboard
             </Button>
           </div>
           <div className="mt-10 grid gap-3 sm:grid-cols-3">
@@ -55,7 +52,7 @@ export function Hero() {
 
         <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/90 p-6 ring-1 ring-white/5 shadow-[0_28px_64px_-32px_rgba(0,0,0,0.55)] sm:p-8">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-xs uppercase tracking-[0.24em] text-slate-400">Demo snapshot</span>
+            <span className="text-xs uppercase tracking-[0.24em] text-slate-400">Live demo</span>
             <span className="rounded-full bg-slate-800 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-300">
               Sample data
             </span>

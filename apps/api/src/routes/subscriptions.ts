@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import {
+  appendProofEvent,
   completeCancellation,
   getRenewalCalendar,
   getSubscriptionDetail,
@@ -7,6 +8,7 @@ import {
   setAutoBlock,
   startCancellation,
 } from "../data/demoState";
+import { sendCancellationOutreach } from "../lib/cancellationOutreach";
 import { requireAuth } from "../lib/auth";
 import { toSuccess } from "../lib/http";
 import {
@@ -37,7 +39,42 @@ export const registerSubscriptionRoutes = (fastify: FastifyInstance): void => {
   fastify.post("/subscriptions/:id/cancel", async (request, reply) => {
     const auth = requireAuth(request);
     const params = parseOrThrow(subscriptionParamsSchema, request.params ?? {}, "subscription params");
-    return reply.status(200).send(toSuccess(startCancellation(auth.user.id, params.id)));
+    const detail = startCancellation(auth.user.id, params.id);
+
+    if (detail.subscription.cancelMethod === "email") {
+      const outreach = await sendCancellationOutreach(auth.user, detail.subscription);
+      appendProofEvent(auth.user.id, {
+        type: "cancellation-outreach",
+        status: outreach.status === "sent" ? "success" : outreach.status === "failed" ? "failure" : "info",
+        subscriptionId: detail.subscription.id,
+        merchant: detail.subscription.merchant,
+        details: {
+          attemptedAt: outreach.attemptedAt,
+          recipient: outreach.recipient,
+          messageId: outreach.messageId,
+          previewUrl: outreach.previewUrl,
+          error: outreach.error,
+        },
+      });
+
+      if (outreach.status === "sent") {
+        setAutoBlock(auth.user.id, params.id, true);
+        appendProofEvent(auth.user.id, {
+          type: "auto-block-update",
+          status: "success",
+          subscriptionId: detail.subscription.id,
+          merchant: detail.subscription.merchant,
+          details: {
+            enabled: true,
+            reason: "Enabled automatically after successful email outreach.",
+          },
+        });
+      }
+
+      return reply.status(200).send(toSuccess(getSubscriptionDetail(auth.user.id, params.id)));
+    }
+
+    return reply.status(200).send(toSuccess(detail));
   });
 
   fastify.post("/subscriptions/:id/cancel/complete", async (request, reply) => {

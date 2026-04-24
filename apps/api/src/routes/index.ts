@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { registerAuthRoutes } from "./auth";
 import { registerDashboardRoutes } from "./dashboard";
 import { registerHealthRoute } from "./health";
+import { registerIntegrationRoutes } from "./integrations";
 import { registerOperationsRoutes } from "./operations";
 import { registerSubscriptionRoutes } from "./subscriptions";
 
@@ -14,6 +15,7 @@ export const registerAppRoutes = (fastify: FastifyInstance): void => {
       registerDashboardRoutes(versionedFastify);
       registerSubscriptionRoutes(versionedFastify);
       registerOperationsRoutes(versionedFastify);
+      registerIntegrationRoutes(versionedFastify);
     },
     { prefix: "/v1" },
   );

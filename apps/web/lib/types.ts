@@ -27,6 +27,21 @@ export interface DashboardSummary {
   potentialSavings: number;
 }
 
+export interface SavingsOpportunity {
+  subscriptionId: string;
+  merchant: string;
+  amount: number;
+  currentAnnualCost: number;
+  projectedAnnualCost: number;
+  monthlySavings: number;
+  annualSavings: number;
+  confidenceScore: number;
+  action: "cancel" | "downgrade" | "switch";
+  reason: string;
+  recommendedPlan: string;
+  urgency: "now" | "this-week" | "this-month";
+}
+
 export interface Subscription {
   id: string;
   merchant: string;

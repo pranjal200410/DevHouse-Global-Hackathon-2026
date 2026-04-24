@@ -3,11 +3,11 @@
 import { AppHeader } from "@/components/app-header";
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
-import { ClientError, getDisputeStudio } from "@/lib/api";
+import { ClientError, getDisputeStudio, generateDisputeDraft } from "@/lib/api";
 import { formatCurrency, formatDateTime } from "@/lib/format";
-import { useSessionStore } from "@/lib/session-store";
+import { useSessionHydrated, useSessionStore } from "@/lib/session-store";
 import type { DisputeStudioItem, DisputeStudioPayload } from "@/lib/types";
-import { CircleDollarSign, FileCheck2, ShieldAlert, Scale } from "lucide-react";
+import { CircleDollarSign, FileCheck2, ShieldAlert, Scale, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -37,12 +37,15 @@ const riskTone = (risk: DisputeStudioItem["riskLevel"]): "emerald" | "amber" | "
 
 export default function DisputesPage() {
   const router = useRouter();
+  const isSessionHydrated = useSessionHydrated();
   const token = useSessionStore((state) => state.token);
   const clearSession = useSessionStore((state) => state.clearSession);
 
   const [payload, setPayload] = useState<DisputeStudioPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [draftLoading, setDraftLoading] = useState<string | null>(null);
+  const [draftResult, setDraftResult] = useState<{ draft: string; claimId: string } | null>(null);
 
   const loadDisputes = useCallback(async () => {
     if (!token) {
@@ -69,15 +72,39 @@ export default function DisputesPage() {
   }, [token, clearSession, router]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (!token) {
       router.replace("/auth");
       return;
     }
 
     void loadDisputes();
-  }, [token, loadDisputes, router]);
+  }, [isSessionHydrated, token, loadDisputes, router]);
 
-  if (!token) {
+  const handleGenerateDraft = async (dispute: DisputeStudioItem) => {
+    if (!token) return;
+    setDraftLoading(dispute.disputeId);
+    try {
+      const result = await generateDisputeDraft(
+        token,
+        dispute.subscriptionId,
+        dispute.merchant,
+        dispute.amount,
+        dispute.reason,
+        dispute.incidentDate,
+      );
+      setDraftResult(result);
+    } catch {
+      // Handle error silently in demo
+    } finally {
+      setDraftLoading(null);
+    }
+  };
+
+  if (!isSessionHydrated || !token) {
     return null;
   }
 
@@ -88,7 +115,7 @@ export default function DisputesPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
       <AppHeader
         title="Dispute Studio"
-        subtitle="Screen 12: track dispute evidence readiness, action priority, and submission status in one queue."
+        subtitle="Organize subscription evidence, track dispute claims, and build your case for refunds. Every action you take in SubGuard captures proof."
         rightSlot={
           <>
             <button className="cta-secondary" onClick={() => void loadDisputes()} type="button">
@@ -133,6 +160,63 @@ export default function DisputesPage() {
       <section className="glass-card reveal p-6" style={{ animationDelay: "100ms" }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">AI Dispute Draft Generator</p>
+            <h2 className="mt-1 text-2xl font-bold text-slate-100">Generate Claim Letters</h2>
+          </div>
+        </div>
+        <p className="mt-2 text-sm text-slate-300">
+          SubGuard&apos;s AI generates dispute claim letters based on your evidence. Use these templates to file chargebacks with your credit card company or bank.
+        </p>
+
+        {draftResult ? (
+          <div className="surface-muted mt-5 space-y-3 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-emerald-100">Draft Generated</p>
+              <button
+                className="text-xs text-slate-400 hover:text-slate-200"
+                onClick={() => setDraftResult(null)}
+                type="button"
+              >
+                Close
+              </button>
+            </div>
+            <pre className="max-h-96 overflow-y-auto rounded-lg bg-slate-950/90 p-4 text-xs text-slate-300">
+              {draftResult.draft}
+            </pre>
+            <div className="flex flex-wrap gap-2 pt-2">
+              <button
+                className="cta-primary text-xs"
+                onClick={() => {
+                  navigator.clipboard.writeText(draftResult.draft);
+                  alert("Copied to clipboard!");
+                }}
+                type="button"
+              >
+                Copy to Clipboard
+              </button>
+              <button
+                className="cta-secondary text-xs"
+                onClick={() => {
+                  const element = document.createElement("a");
+                  element.setAttribute("href", `data:text/plain;charset=utf-8,${encodeURIComponent(draftResult.draft)}`);
+                  element.setAttribute("download", `dispute-${draftResult.claimId}.txt`);
+                  element.style.display = "none";
+                  document.body.appendChild(element);
+                  element.click();
+                  document.body.removeChild(element);
+                }}
+                type="button"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </section>
+
+      <section className="glass-card reveal p-6" style={{ animationDelay: "100ms" }}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Screen 12 - Dispute Studio + Settings</p>
             <h2 className="mt-1 text-2xl font-bold text-slate-100">Evidence Queue</h2>
           </div>
@@ -167,6 +251,15 @@ export default function DisputesPage() {
                   <Link className="cta-secondary" href={`/subscriptions/${dispute.subscriptionId}`}>
                     Open Detail
                   </Link>
+                  <button
+                    className="cta-primary"
+                    disabled={draftLoading === dispute.disputeId}
+                    onClick={() => void handleGenerateDraft(dispute)}
+                    type="button"
+                  >
+                    <Sparkles size={14} />
+                    {draftLoading === dispute.disputeId ? "Generating..." : "Generate Draft"}
+                  </button>
                 </div>
               </div>
 

@@ -4,7 +4,7 @@ import { AppHeader } from "@/components/app-header";
 import { StatusBadge } from "@/components/status-badge";
 import { ClientError, getRenewalCalendar } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { useSessionStore } from "@/lib/session-store";
+import { useSessionHydrated, useSessionStore } from "@/lib/session-store";
 import type { RenewalCalendarItem } from "@/lib/types";
 import { CalendarDays } from "lucide-react";
 import Link from "next/link";
@@ -23,6 +23,7 @@ const riskTone = (riskColor: RenewalCalendarItem["riskColor"]): "emerald" | "amb
 
 export default function RenewalsPage() {
   const router = useRouter();
+  const isSessionHydrated = useSessionHydrated();
   const token = useSessionStore((state) => state.token);
   const clearSession = useSessionStore((state) => state.clearSession);
 
@@ -55,19 +56,23 @@ export default function RenewalsPage() {
   }, [token, clearSession, router]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (!token) {
       router.replace("/auth");
       return;
     }
     void loadCalendar();
-  }, [token, loadCalendar, router]);
+  }, [isSessionHydrated, token, loadCalendar, router]);
 
   const totalUpcomingExposure = useMemo(
     () => events.reduce((sum, event) => sum + event.amount, 0),
     [events],
   );
 
-  if (!token) {
+  if (!isSessionHydrated || !token) {
     return null;
   }
 

@@ -165,6 +165,7 @@ test("protected endpoints reject missing authorization token", async () => {
       app.inject({ method: "GET", url: "/v1/auth/session" }),
       app.inject({ method: "POST", url: "/v1/auth/logout" }),
       app.inject({ method: "GET", url: "/v1/dashboard/summary" }),
+      app.inject({ method: "GET", url: "/v1/dashboard/savings-opportunities" }),
       app.inject({ method: "GET", url: "/v1/subscriptions" }),
       app.inject({ method: "GET", url: "/v1/subscriptions/sub_netflix" }),
       app.inject({ method: "POST", url: "/v1/subscriptions/sub_netflix/cancel" }),
@@ -184,10 +185,49 @@ test("protected endpoints reject missing authorization token", async () => {
       }),
       app.inject({ method: "GET", url: "/v1/disputes/studio" }),
       app.inject({ method: "GET", url: "/v1/alerts/feed" }),
+      app.inject({ method: "POST", url: "/v1/integrations/inbox/sync", payload: { maxMessages: 10 } }),
+      app.inject({ method: "GET", url: "/v1/integrations/proof-log?limit=10" }),
     ]);
 
     for (const response of checks) {
       assert.equal(response.statusCode, 401);
+    }
+  } finally {
+    await app.close();
+  }
+});
+
+test("dashboard savings opportunities returns ranked rows with positive savings", async () => {
+  const app = buildServer();
+
+  try {
+    const token = await login(app, uniqueEmail("savings-opps"));
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/dashboard/savings-opportunities",
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    assert.equal(response.statusCode, 200);
+
+    const body = response.json() as SuccessEnvelope<
+      Array<{
+        annualSavings: number;
+        monthlySavings: number;
+        confidenceScore: number;
+        action: string;
+      }>
+    >;
+
+    assert.ok(body.data.length > 0);
+    assert.ok(body.data.length <= 5);
+
+    for (const row of body.data) {
+      assert.ok(row.annualSavings > 0);
+      assert.ok(row.monthlySavings > 0);
+      assert.ok(row.confidenceScore >= 0 && row.confidenceScore <= 100);
+      assert.ok(["cancel", "downgrade", "switch"].includes(row.action));
     }
   } finally {
     await app.close();

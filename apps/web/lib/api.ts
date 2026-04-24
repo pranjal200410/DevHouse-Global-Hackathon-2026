@@ -6,6 +6,7 @@ import type {
   DisputeStudioPayload,
   ProtectionControlsPayload,
   RenewalCalendarItem,
+  SavingsOpportunity,
   SessionResponse,
   Subscription,
   SubscriptionDetail,
@@ -80,6 +81,12 @@ export const logoutSession = async (token: string): Promise<{ loggedOut: boolean
 
 export const getDashboardSummary = async (token: string): Promise<DashboardSummary> =>
   request<DashboardSummary>("/v1/dashboard/summary", {
+    method: "GET",
+    token,
+  });
+
+export const getSavingsOpportunities = async (token: string): Promise<SavingsOpportunity[]> =>
+  request<SavingsOpportunity[]>("/v1/dashboard/savings-opportunities", {
     method: "GET",
     token,
   });
@@ -180,4 +187,18 @@ export const getDisputeStudio = async (token: string): Promise<DisputeStudioPayl
   request<DisputeStudioPayload>("/v1/disputes/studio", {
     method: "GET",
     token,
+  });
+
+export const generateDisputeDraft = async (
+  token: string,
+  subscriptionId: string,
+  merchant: string,
+  amount: number,
+  reason: string,
+  incidentDate: string,
+): Promise<{ draft: string; claimId: string }> =>
+  request<{ draft: string; claimId: string }>(`/v1/integrations/dispute-draft/${subscriptionId}`, {
+    method: "POST",
+    token,
+    body: JSON.stringify({ merchant, amount, reason, incidentDate }),
   });

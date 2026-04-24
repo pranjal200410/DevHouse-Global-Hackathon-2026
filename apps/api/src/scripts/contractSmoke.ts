@@ -173,6 +173,32 @@ const main = async (): Promise<void> => {
       "alerts feed returned invalid severity",
     );
 
+    const inboxSync = await app.inject({
+      method: "POST",
+      url: "/v1/integrations/inbox/sync",
+      headers: authHeaders,
+      payload: {
+        maxMessages: 100,
+      },
+    });
+    assert.equal(inboxSync.statusCode, 200, "inbox sync endpoint failed");
+    const inboxSyncBody = inboxSync.json() as Envelope<{ importedCount: number; detections: unknown[] }>;
+    assert.ok(inboxSyncBody.data.importedCount >= 3, "expected at least 3 detected subscriptions from inbox source");
+    assert.ok(Array.isArray(inboxSyncBody.data.detections), "inbox sync detections shape mismatch");
+
+    const proofLog = await app.inject({
+      method: "GET",
+      url: "/v1/integrations/proof-log?limit=30",
+      headers: authHeaders,
+    });
+    assert.equal(proofLog.statusCode, 200, "proof log endpoint failed");
+    const proofLogBody = proofLog.json() as Envelope<Array<{ timestamp: string; type: string }>>;
+    assert.ok(proofLogBody.data.length >= 1, "expected proof log events after integrations run");
+    assert.ok(
+      proofLogBody.data.every((event) => Boolean(event.timestamp) && Boolean(event.type)),
+      "proof log entries missing timestamp or type",
+    );
+
     console.log("API contract smoke checks passed.");
   } finally {
     await app.close();

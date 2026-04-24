@@ -28,3 +28,15 @@ export const setBlockPayloadSchema = z
     enabled: z.boolean(),
   })
   .strict();
+
+export const inboxSyncPayloadSchema = z
+  .object({
+    maxMessages: z.number().int().min(1).max(500).optional(),
+  })
+  .strict();
+
+export const proofLogQuerySchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(500).optional(),
+  })
+  .strict();

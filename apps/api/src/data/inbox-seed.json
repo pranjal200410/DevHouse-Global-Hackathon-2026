@@ -1,0 +1,30 @@
+[
+  {
+    "id": "seed-msg-001",
+    "from": "Netflix Billing <billing@netflix.com>",
+    "subject": "Your Netflix subscription renewal receipt - $15.99",
+    "date": "2026-04-19T08:20:00.000Z",
+    "text": "Hello, this is your monthly subscription receipt for Netflix. Amount charged: $15.99. For cancellation contact support@netflix.com"
+  },
+  {
+    "id": "seed-msg-002",
+    "from": "Spotify Premium <no-reply@spotify.com>",
+    "subject": "Spotify Premium renewal notice ($11.99)",
+    "date": "2026-04-19T09:00:00.000Z",
+    "text": "Your subscription will renew. Amount due $11.99. Cancel at support@spotify.com"
+  },
+  {
+    "id": "seed-msg-003",
+    "from": "Notion Team <billing@makenotion.com>",
+    "subject": "Invoice paid for Notion Plus USD $12.00",
+    "date": "2026-04-19T09:30:00.000Z",
+    "text": "Thank you for your subscription payment of $12.00. Cancellation requests: support@makenotion.com"
+  },
+  {
+    "id": "seed-msg-004",
+    "from": "CloudAI Accounts <billing@cloudai.example>",
+    "subject": "CloudAI Starter monthly receipt",
+    "date": "2026-04-19T10:00:00.000Z",
+    "text": "CloudAI Starter invoice processed. Total: $25.00. Contact support@cloudai.example for cancellation."
+  }
+]

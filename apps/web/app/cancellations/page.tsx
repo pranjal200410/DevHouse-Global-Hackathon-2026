@@ -9,7 +9,7 @@ import {
   startCancellation,
 } from "@/lib/api";
 import { formatCurrency, formatDateTime } from "@/lib/format";
-import { useSessionStore } from "@/lib/session-store";
+import { useSessionHydrated, useSessionStore } from "@/lib/session-store";
 import type { CancellationCenterItem } from "@/lib/types";
 import { CircleCheckBig, LoaderCircle, ShieldAlert } from "lucide-react";
 import Link from "next/link";
@@ -38,6 +38,7 @@ const stateTone = (state: CancellationCenterItem["state"]): "slate" | "amber" | 
 
 export default function CancellationsPage() {
   const router = useRouter();
+  const isSessionHydrated = useSessionHydrated();
   const token = useSessionStore((state) => state.token);
   const clearSession = useSessionStore((state) => state.clearSession);
 
@@ -70,12 +71,16 @@ export default function CancellationsPage() {
   }, [token, clearSession, router]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (!token) {
       router.replace("/auth");
       return;
     }
     void loadCenter();
-  }, [token, loadCenter, router]);
+  }, [isSessionHydrated, token, loadCenter, router]);
 
   const handleAction = async (item: CancellationCenterItem) => {
     if (!token || item.state === "completed") {
@@ -104,7 +109,7 @@ export default function CancellationsPage() {
     }
   };
 
-  if (!token) {
+  if (!isSessionHydrated || !token) {
     return null;
   }
 

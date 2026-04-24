@@ -52,14 +52,14 @@ export default function Problem() {
           className="font-light leading-relaxed max-w-2xl mb-6"
           style={{ fontSize: "1rem", color: "rgba(248,249,251,0.6)" }}
         >
-          You sign up. You try it once. Life gets busy. Then you see a charge on your card. Another the next month. You're paying for something you haven't used in months. It's not a lot each time. But it adds up fast. And it keeps happening because companies count on you forgetting.
+          You sign up. You try it once. Life gets busy. Then you see a charge on your card. Another the next month. You&apos;re paying for something you haven&apos;t used in months. It&apos;s not a lot each time. But it adds up fast. And it keeps happening because companies count on you forgetting.
         </p>
 
         <p
           className="font-light leading-relaxed max-w-2xl mb-10"
           style={{ fontSize: "1rem", color: "rgba(248,249,251,0.6)" }}
         >
-          The system is rigged against you. Trial dates turn into paid charges without warning. Renewal dates are hidden. You don't get reminders. By the time you catch it, weeks of charges have already gone through. You need one place that shows every subscription you have, warns you before they charge, and lets you kill them instantly.
+          The system is rigged against you. Trial dates turn into paid charges without warning. Renewal dates are hidden. You don&apos;t get reminders. By the time you catch it, weeks of charges have already gone through. You need one place that shows every subscription you have, warns you before they charge, and lets you kill them instantly.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

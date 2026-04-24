@@ -9,7 +9,7 @@ import {
   updateProtectionControl,
 } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { useSessionStore } from "@/lib/session-store";
+import { useSessionHydrated, useSessionStore } from "@/lib/session-store";
 import type { ProtectionControlItem, ProtectionControlsPayload } from "@/lib/types";
 import { Lock, ShieldAlert, ShieldCheck, Timer } from "lucide-react";
 import Link from "next/link";
@@ -38,6 +38,7 @@ const statusTone = (status: ProtectionControlItem["status"]): "blue" | "amber" |
 
 export default function ProtectionControlsPage() {
   const router = useRouter();
+  const isSessionHydrated = useSessionHydrated();
   const token = useSessionStore((state) => state.token);
   const clearSession = useSessionStore((state) => state.clearSession);
 
@@ -70,12 +71,16 @@ export default function ProtectionControlsPage() {
   }, [token, clearSession, router]);
 
   useEffect(() => {
+    if (!isSessionHydrated) {
+      return;
+    }
+
     if (!token) {
       router.replace("/auth");
       return;
     }
     void loadControls();
-  }, [token, loadControls, router]);
+  }, [isSessionHydrated, token, loadControls, router]);
 
   const handleToggle = async (item: ProtectionControlItem) => {
     if (!token) {
@@ -100,7 +105,7 @@ export default function ProtectionControlsPage() {
     }
   };
 
-  if (!token) {
+  if (!isSessionHydrated || !token) {
     return null;
   }
 
@@ -110,8 +115,8 @@ export default function ProtectionControlsPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-8 md:py-10">
       <AppHeader
-        title="Protection Controls"
-        subtitle="Screen 11: manage per-subscription Auto-Block status before renewal windows open."
+        title="Subscription Tracking"
+        subtitle="Enable tracking on subscriptions to capture comprehensive evidence if you need to file disputes or prove unauthorized charges."
         rightSlot={
           <>
             <button className="cta-secondary" onClick={() => void loadControls()} type="button">
@@ -156,8 +161,8 @@ export default function ProtectionControlsPage() {
       <section className="glass-card reveal p-6" style={{ animationDelay: "100ms" }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Screen 11 - Protection Controls</p>
-            <h2 className="mt-1 text-2xl font-bold text-slate-100">Auto-Block Matrix</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Screen 11 - Subscription Tracking</p>
+            <h2 className="mt-1 text-2xl font-bold text-slate-100">Enable Tracking for Dispute Evidence</h2>
           </div>
           <StatusBadge
             label={`${controls.filter((item) => item.autoBlockEnabled).length} active`}
